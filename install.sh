@@ -49,6 +49,8 @@ root_required() {
   fi
 }
 others_checks() {
+  root_required
+
   if [[ $(lsb_release -rs) != "18.04" ]]; then
     warning "This script was tested only on Ubuntu 18.04 LTS, but let's go ahead..."
   fi
@@ -110,23 +112,22 @@ setup_color() {
   RESET=$(printf '\033[m')
 }
 
-setup_shell() {
-  if ! command_exists zsh; then
-    info Installing zsh...
-    apt install -y zsh curl wget
-  fi
+setup_basics() {
+  info Update and Upgrade
+  apt update && apt upgrade -y
+  info Installing zsh and other basics...
+  apt install -y zsh curl wget software-properties-common locales
 }
 
 main() {
   setup_color
   call_vars
   others_checks
-  root_required
-  setup_shell
+  setup_basics
 
   # Run as unattended if stdin is closed
   if [ ! -t 0 ]; then
-    AUTO=true
+    AUTO="true"
   fi
 
   # Parse arguments
