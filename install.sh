@@ -18,10 +18,11 @@ call_vars() {
   MOSH=${MOSH:-yes}
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
+  my_pass=${my_pass:=$(random_string)}
 }
 
 random_string() {
-  cat /dev/urandom | tr -dc 'a-zA-Z0-9-#&' | fold -w 32 | head -n 1
+  sed "s/[^a-zA-Z0-9]//g" <<<$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%*()+-' | fold -w 32 | head -n 1)
 }
 
 command_exists() {
@@ -29,7 +30,7 @@ command_exists() {
 }
 
 install() {
-  apt install -y "$@"
+  LC_ALL=C.UTF-8 apt install -y "$@"
 }
 
 error() {
@@ -98,62 +99,50 @@ step_ufw() {
 step_nginx() {
   if [ "$NO_NGINX" != "true" ]; then
     install nginx
-
-    cat >/etc/nginx/conf.d/gzip.conf <<EOF
-gzip on;
-gzip_comp_level 5;
-gzip_min_length 1000;
-gzip_proxied no-cache no-store private expired auth;
-gzip_vary on;
-gzip_types
-application/atom+xml
-application/javascript
-application/json
-application/rss+xml
-application/vnd.ms-fontobject
-application/x-font-ttf
-application/x-web-app-manifest+json
-application/xhtml+xml
-application/xml
-font/opentype
-image/svg+xml
-image/x-icon
-text/css
-text/plain
-text/x-component;
-EOF
-    service nginx restart
+    # TODO enable gzip
 
     if command_exists ufw; then
       ufw allow 'Nginx HTTP'
       ufw allow 'Nginx HTTPS'
     fi
+
+    service nginx restart
   fi
 }
 step_php() {
-  # TODO Composer, php-fpm, laravel command
-  if [ "$NO_UFW" != "true" ]; then
-    echo ''
+  if [ "$NO_PHP" != "true" ]; then
+    install php php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis}
+
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');"
+    mv composer.phar /usr/local/bin/composer
+
+    composer global require hirak/prestissimo laravel/installer
+
+    runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
   fi
 }
 step_node() {
-  # TODO node, npm, yarn
-  if [ "$NO_UFW" != "true" ]; then
-    echo ''
+  # yarn with node and npm
+  if [ "$NO_NODE" != "true" ]; then
+    install yarn
   fi
 }
 step_mysql() {
-  if [ "$NO_UFW" != "true" ]; then
-    echo ''
+  if [ "$NO_MYSQL" != "true" ]; then
+    debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass"
+    debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass"
+    i mariadb-server
   fi
 }
 step_postgres() {
-  if [ "$NO_UFW" != "true" ]; then
+  if [ "$NO_POSTGRES" != "true" ]; then
     echo ''
   fi
 }
 step_lets_encrypt() {
-  if [ "$NO_UFW" != "true" ]; then
+  if [ "$NO_LETS" != "true" ]; then
     echo ''
   fi
 }
@@ -180,6 +169,7 @@ step_final() {
   echo "$RESET"
 
   echo "USER: $RED$BOLD$user$RESET and password: $RED$BOLD$pass$RESET" >&2
+  echo "MariaDB => User $RED$BOLD$user$RESET and password: $RED$BOLD$my_pass$RESET" >&2
 
   # If this user's login shell is already "zsh", do not attempt to switch.
   if [ "$(basename "$SHELL")" = "zsh" ]; then
@@ -198,13 +188,26 @@ setup_color() {
   RESET=$(printf '\033[m')
 }
 
-setup_basics() {
+step_initial() {
+  export DEBIAN_FRONTEND=noninteractive
+
   if [ "$SKIP_UPDATES" != "true" ]; then
     info Update and Upgrade
-    apt update && apt upgrade -y
+
+    install language-pack-en-base software-properties-common
+    export LC_ALL=en_US.UTF-8
+    export LANG=en_US.UTF-8
+
+    # yarn / node / npm
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php # forces apt update
+
+    apt upgrade -y
   fi
+
   info Installing zsh and other basics...
-  install zsh curl wget software-properties-common locales
+  install zsh curl wget locales zip unzip
 }
 
 parse_arguments() {
@@ -248,6 +251,26 @@ parse_arguments() {
       NO_NGINX="true"
       shift 1
       ;;
+    --no-php) # do not install or configure php (--auto does)
+      NO_PHP="true"
+      shift 1
+      ;;
+    --no-node) # do not install or configure yarn/node/npm (--auto does)
+      NO_NODE="true"
+      shift 1
+      ;;
+    --no-mysql) # do not install or configure mysql (--auto does)
+      NO_MYSQL="true"
+      shift 1
+      ;;
+    --no-postgres) # do not install or configure postgresql (--auto does)
+      NO_POSTGRES="true"
+      shift 1
+      ;;
+    --no-lets-encrypt) # do not install or configure let's encrypt / certbot (--auto does)
+      NO_LETS="true"
+      shift 1
+      ;;
     --user=*)
       user="${1#*=}"
       shift 1
@@ -282,11 +305,17 @@ main() {
 
   parse_arguments "$@"
 
-  setup_basics
+  step_initial
 
   step_user_creation
-  step_ufw
-  step_nginx
+  #  step_ufw
+  #  step_nginx
+  #  step_php
+  #  step_node
+  #  step_mysql # Actually, it's MariaDB
+  #  step_postgres
+  #  step_lets_encrypt
+
   step_final
 
 }
