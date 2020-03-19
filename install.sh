@@ -198,7 +198,6 @@ step_ufw() {
     # TODO allow add ips via command
     install ufw
     ufw --force reset
-    ufw logging on
     ufw disable
     ufw default deny incoming
     ufw default allow outgoing
@@ -206,8 +205,16 @@ step_ufw() {
     ufw allow 22/tcp
     ufw allow 80/tcp
     ufw allow 443/tcp
+    expect -c "
+        set timeout 3
+        spawn ufw enable
 
-    ufw enable
+        expect \"Command may disrupt existing ssh connections\"
+        send -- \"y\r\"
+        expect eof
+"
+    ufw logging on
+
     ufw status
   fi
 }
@@ -233,7 +240,8 @@ step_php() {
     runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
     runuser -l $user -c $'php composer-setup.php'
     runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
-    runuser -l $user -c $'mv composer.phar /usr/local/bin/composer'
+
+    mv ~"$user"/composer.phar /usr/local/bin/composer
 
     runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
 
@@ -344,6 +352,7 @@ step_initial() {
   export DEBIAN_FRONTEND=noninteractive
 
   if [ "$SKIP_SWAP" != "true" ]; then
+    info "Creating swapfile of $swapsize bytes..."
     if [[ $(swapon --show) ]]; then
       swapoff /swapfile
       rm /swapfile
@@ -356,7 +365,7 @@ step_initial() {
   fi
 
   if [ "$SKIP_UPDATES" != "true" ]; then
-    info Update and Upgrade
+    info Updates and Upgrade
 
     install locales language-pack-en-base software-properties-common
     export LC_ALL=en_US.UTF-8
