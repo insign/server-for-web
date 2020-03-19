@@ -241,7 +241,8 @@ step_php() {
     runuser -l $user -c $'php composer-setup.php'
     runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
 
-    mv ~"$user"/composer.phar /usr/local/bin/composer
+    local -r user_homedir=~$user
+    mv $user_homedir/composer.phar /usr/local/bin/composer
 
     runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
 
@@ -352,7 +353,7 @@ step_initial() {
   export DEBIAN_FRONTEND=noninteractive
 
   if [ "$SKIP_SWAP" != "true" ]; then
-    info "Creating swapfile of $swapsize bytes..."
+    info "Creating swapfile of $swapsize mb..."
     if [[ $(swapon --show) ]]; then
       swapoff /swapfile
       rm /swapfile
