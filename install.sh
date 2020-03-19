@@ -1,13 +1,13 @@
 #!/bin/bash
 #
 # This script should be run via curl:
-#   sh -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
 # or wget:
-#   sh -c "$(wget -qO- https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+#   bash -c "$(wget -qO- https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
 #
 # As an alternative, you can first download the install script and run it afterwards:
 #   wget https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh
-#   sh install.sh
+#   bash install.sh
 
 set -e
 
@@ -15,6 +15,7 @@ set -e
 call_vars() {
   BLOCK_PW=${BLOCK_PW:-yes}
   MOSH=${MOSH:-yes}
+  swapsize=${swapsize:-2048}
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
   my_pass_root=${my_pass_root:=$(random_string)}
@@ -225,7 +226,8 @@ step_nginx() {
 }
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
-    install php php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis}
+    install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis}
+    install php
 
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     php composer-setup.php
@@ -340,6 +342,16 @@ setup_color() {
 step_initial() {
   export DEBIAN_FRONTEND=noninteractive
 
+  if [ "$SKIP_SWAP" != "true" ]; then
+    swapoff /swapfile
+    rm /swapfile
+    dd if=/dev/zero of=/swapfile bs=1M count=$swapsize
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    swapon -s # status
+  fi
+
   if [ "$SKIP_UPDATES" != "true" ]; then
     info Update and Upgrade
 
@@ -379,6 +391,10 @@ parse_arguments() {
       ;;
     --keep-existing-user) # keep existent user if it exists (Unlike default behavior)
       KEEP_EXISTING_USER="true"
+      shift 1
+      ;;
+    --skip-swap) # do not creates swapfile (Unlike default behavior)
+      SKIP_SWAP="true"
       shift 1
       ;;
     --skip-updates) # do not updates nor upgrades the system (Unlike default behavior)
@@ -425,11 +441,11 @@ parse_arguments() {
       pass="${1#*=}"
       shift 1
       ;;
-    --my-pass-root=*)  # set the mysql root password (default is random)
+    --my-pass-root=*) # set the mysql root password (default is random)
       my_pass_root="${1#*=}"
       shift 1
       ;;
-    --my-pass-user=*)  # set the mysql user password (default is random)
+    --my-pass-user=*) # set the mysql user password (default is random)
       my_pass_user="${1#*=}"
       shift 1
       ;;
