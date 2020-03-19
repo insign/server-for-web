@@ -271,11 +271,7 @@ step_mysql() {
         expect \"Enter current password for root (enter for none):\"
         send -- \"${my_pass_root}\r\"
         expect \"Set root password?\"
-        send -- \"Y\r\"
-        expect \"New password:\"
-        send -- \"${my_pass_root}\r\"
-        expect \"Re-enter new password:\"
-        send -- \"${my_pass_root}\r\"
+        send -- \"n\r\"
         expect \"Remove anonymous users?\"
         send -- \"Y\r\"
         expect \"Disallow root login remotely?\"
@@ -289,7 +285,7 @@ step_mysql() {
 
     add_to_report "MariaDB,$RED${BOLD}root$RESET,$RED$BOLD$my_pass_root$RESET"
 
-    local -r MY_USER_EXISTS="$(mysql -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
+    local -r MY_USER_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
       mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
     else
