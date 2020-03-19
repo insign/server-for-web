@@ -205,7 +205,8 @@ step_ufw() {
     ufw allow 22/tcp
     ufw allow 80/tcp
     ufw allow 443/tcp
-    expect -c "
+    if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+      expect -c "
         set timeout 3
         spawn ufw enable
 
@@ -213,6 +214,9 @@ step_ufw() {
         send -- \"y\r\"
         expect eof
 "
+    else
+      ufw enable
+    fi
     ufw logging on
 
     ufw status
@@ -381,7 +385,7 @@ step_initial() {
 
     # MariaDB
     apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-    add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu eoan main'  # forces apt update
+    add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu bionic main' # forces apt update
 
     apt upgrade -y
   fi
