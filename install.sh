@@ -244,7 +244,7 @@ step_php() {
     local -r user_homedir=$(runuser -l $user -c $'pwd')
     mv $user_homedir/composer.phar /usr/local/bin/composer
 
-    runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
+    runuser -l $user -c $'composer global require hirak/prestissimo'
 
     runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
   fi
