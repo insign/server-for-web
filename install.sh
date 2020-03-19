@@ -343,8 +343,10 @@ step_initial() {
   export DEBIAN_FRONTEND=noninteractive
 
   if [ "$SKIP_SWAP" != "true" ]; then
-    swapoff /swapfile
-    rm /swapfile
+    if [[ $(swapon --show) ]]; then
+      swapoff /swapfile
+      rm /swapfile
+    fi
     dd if=/dev/zero of=/swapfile bs=1M count=$swapsize
     chmod 600 /swapfile
     mkswap /swapfile
