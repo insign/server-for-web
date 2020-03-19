@@ -314,6 +314,7 @@ step_final() {
   fi
 
   apt purge -y expect
+  apt autoremove -y
 
   echo "$GREEN"
   # http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=DONE!
