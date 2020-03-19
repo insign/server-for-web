@@ -375,7 +375,13 @@ step_initial() {
     # yarn / node / npm
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
+    # PHP
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php # forces apt update
+
+    # MariaDB
+    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+    add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu eoan main'  # forces apt update
 
     apt upgrade -y
   fi
