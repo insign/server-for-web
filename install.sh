@@ -241,7 +241,7 @@ step_php() {
     runuser -l $user -c $'php composer-setup.php'
     runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
 
-    local -r user_homedir=~$user
+    local -r user_homedir=$(echo ~$user)
     mv $user_homedir/composer.phar /usr/local/bin/composer
 
     runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
