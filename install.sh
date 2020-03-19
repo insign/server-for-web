@@ -199,6 +199,7 @@ step_ufw() {
     install ufw
     ufw --force reset
     ufw logging on
+    ufw disable
     ufw default deny incoming
     ufw default allow outgoing
     ufw allow ssh
@@ -229,12 +230,12 @@ step_php() {
     install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis}
     install php
 
-     runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
-     runuser -l $user -c $'php composer-setup.php'
-     runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
-     runuser -l $user -c $'mv composer.phar /usr/local/bin/composer'
+    runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
+    runuser -l $user -c $'php composer-setup.php'
+    runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
+    runuser -l $user -c $'mv composer.phar /usr/local/bin/composer'
 
-     runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
+    runuser -l $user -c $'composer global require hirak/prestissimo laravel/installer'
 
     runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
   fi
