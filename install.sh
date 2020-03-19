@@ -256,20 +256,20 @@ step_php() {
 step_node() {
   # yarn with node and npm
   if [ "$NO_NODE" != "true" ]; then
-    install yarn
+    install yarn nodejs
   fi
 }
 step_mysql() {
   if [ "$NO_MYSQL" != "true" ]; then
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
-    install mariadb-server
+    install mariadb-server-10.3
     expect -c "
         set timeout 3
         spawn mysql_secure_installation
 
         expect \"Enter current password for root (enter for none):\"
-        send -- \"\r\"
+        send -- \"${my_pass_root}\r\"
         expect \"Set root password?\"
         send -- \"Y\r\"
         expect \"New password:\"
@@ -372,13 +372,16 @@ step_initial() {
   if [ "$SKIP_UPDATES" != "true" ]; then
     info Updates and Upgrade
 
-    install locales language-pack-en-base software-properties-common
+    install locales language-pack-en-base software-properties-common build-essential
     export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
 
-    # yarn / node / npm
+    # yarn
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
+    # node / npm
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 
     # PHP
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php # forces apt update
