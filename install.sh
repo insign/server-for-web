@@ -291,11 +291,11 @@ step_mysql() {
 
     local -r MY_USER_EXISTS="$(mysql -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
-      mysql <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
+      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
     else
-      mysql <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
+      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
     fi
-    mysql <<<"FLUSH PRIVILEGES;"
+    mysql -uroot -p"$my_pass_root" <<<"FLUSH PRIVILEGES;"
 
     add_to_report "MariaDB,$RED${BOLD}$user$RESET,$RED$BOLD$my_pass_user$RESET"
   fi
