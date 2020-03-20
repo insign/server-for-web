@@ -45,10 +45,10 @@ bash install.sh
 * `--skip-updates` - Skip updates and upgrade the system (not recommended)
 * `--no-omz` - don't install oh-my-zsh framework (not recommended)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
-*  `--no-nginx` - don't install or configure nginx
+* `--no-nginx` - don't install or configure nginx
 * `--no-php` - don't install or configure php
 * `--no-node` - don't install or configure yarn/node/npm
-* `--no-mysql` - don't install or configure mysql
+* `--no-mysql` - don't install or configure mysql (MariaDB actually)
 * `--my-pass-root` - set the mysql root password. Default is _random_ (shown at the end)
 * `--my-pass-user` - set the mysql user password. Default is _random_ (shown at the end)
 
@@ -57,8 +57,10 @@ bash install.sh
 * `--no-lets-encrypt` - ~~don't install or configure let's encrypt / certbot~~
 
 ## Examples
-### Web Server
->Soon
+### Web Server (with nginx & php)
+```shell
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)" "" --no-mysql --no-postgres
+```
 ### Database Server
 >Soon
 ### Cache Server
@@ -73,6 +75,7 @@ bash install.sh
 - [ ] Generate ssh key
 - [ ] Import private key
 - [ ] Remove password login (ssh key only)
+- [ ] Support for multiple php versions https://github.com/wilmoore/php-version
 - [ ] Install mosh as alternative of ssh
 - [ ] One-parameter group for every possible (web,cache,db,queue)
 - [ ] Send report via e-mail
