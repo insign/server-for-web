@@ -17,7 +17,5 @@ jobs:
     steps:
       - name: remote-bash
         uses: shinhwagk/remote-bash@0.0.1
-        with:
-          args: --no-swap
         env:
           REMOTE_BASH_URL: https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh
