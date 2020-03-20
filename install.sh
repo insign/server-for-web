@@ -301,6 +301,11 @@ step_postgres() {
     echo ''
   fi
 }
+step_supervisor() {
+  if [ "$NO_SUPERVISOR" != "true" ]; then
+    echo ''
+  fi
+}
 step_lets_encrypt() {
   if [ "$NO_LETS" != "true" ]; then
     echo ''
@@ -416,43 +421,47 @@ parse_arguments() {
       KEEP_EXISTING_USER="true"
       shift 1
       ;;
-    --skip-swap) # do not creates swapfile (Unlike default behavior)
+    --skip-swap) # don't creates swapfile (Unlike default behavior)
       SKIP_SWAP="true"
       shift 1
       ;;
-    --skip-updates) # do not updates nor upgrades the system (Unlike default behavior)
+    --swap-size=*) # set swap file size in MB (Unlike default behavior)
+      swapsize="${1#*=}"
+      shift 1
+      ;;
+    --skip-updates) # don't updates nor upgrades the system (Unlike default behavior)
       SKIP_UPDATES="true"
       shift 1
       ;;
-    --no-omz) # do not install oh-my-zsh framework (Unlike default behavior)
+    --no-omz) # don't install oh-my-zsh framework (Unlike default behavior)
       NO_OMZ="true"
       shift 1
       ;;
-    --no-ufw) # do not install or configure UFW firewall (Unlike default behavior)
+    --no-ufw) # don't install or configure UFW firewall (Unlike default behavior)
       NO_UFW="true"
       shift 1
       ;;
-    --no-nginx) # do not install or configure nginx (Unlike default behavior)
+    --no-nginx) # don't install or configure nginx (Unlike default behavior)
       NO_NGINX="true"
       shift 1
       ;;
-    --no-php) # do not install or configure php (Unlike default behavior)
+    --no-php) # don't install or configure php (Unlike default behavior)
       NO_PHP="true"
       shift 1
       ;;
-    --no-node) # do not install or configure yarn/node/npm (Unlike default behavior)
+    --no-node) # don't install or configure yarn/node/npm (Unlike default behavior)
       NO_NODE="true"
       shift 1
       ;;
-    --no-mysql) # do not install or configure mysql (Unlike default behavior)
+    --no-mysql) # don't install or configure mysql (Unlike default behavior)
       NO_MYSQL="true"
       shift 1
       ;;
-    --no-postgres) # do not install or configure postgresql (Unlike default behavior)
+    --no-postgres) # don't install or configure postgresql (Unlike default behavior)
       NO_POSTGRES="true"
       shift 1
       ;;
-    --no-lets-encrypt) # do not install or configure let's encrypt / certbot (Unlike default behavior)
+    --no-lets-encrypt) # don't install or configure let's encrypt / certbot (Unlike default behavior)
       NO_LETS="true"
       shift 1
       ;;
@@ -503,6 +512,7 @@ main() {
   step_node
   step_mysql # Actually, it's MariaDB
   step_postgres
+  step_supervisor
   step_lets_encrypt
 
   step_final
