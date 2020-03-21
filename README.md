@@ -53,9 +53,11 @@ bash install.sh
 * `--no-mysql` - don't install or configure mysql (MariaDB actually)
 * `--my-pass-root` - set the mysql root password. Default is _random_ (shown at the end)
 * `--my-pass-user` - set the mysql user password. Default is _random_ (shown at the end)
+* `--no-postgres` - don't install or configure postgresql
+* `--pg-pass-root` - set the pg postgres user password. Default is _random_ (shown at the end)
+* `--pg-pass-user` - set the pg user password. Default is _random_ (shown at the end)
 
 >Soon
-* `--no-postgres` ~~- don't install or configure postgresql~~
 * `--no-lets-encrypt` - ~~don't install or configure let's encrypt / certbot~~
 
 ## Examples

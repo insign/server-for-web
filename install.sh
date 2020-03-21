@@ -18,8 +18,13 @@ call_vars() {
   swapsize=${swapsize:-2048}
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
+  pg_pass=${pg_pass:=$(random_string)}
+
   my_pass_root=${my_pass_root:=$(random_string)}
   my_pass_user=${my_pass_user:=$(random_string)}
+
+  pg_pass_root=${pg_pass_root:=$(random_string)}
+  pg_pass_user=${pg_pass_user:=$(random_string)}
 
   REPORT=''
 }
@@ -287,23 +292,37 @@ step_mysql() {
 
     local -r MY_USER_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
-      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
+      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
     else
-      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '$my_pass_user';"
+      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
     fi
     mysql -uroot -p"$my_pass_root" <<<"FLUSH PRIVILEGES;"
 
-    add_to_report "MariaDB,$RED${BOLD}$user$RESET,$RED$BOLD$my_pass_user$RESET"
+    add_to_report "MariaDB,$RED${BOLD}${user}$RESET,$RED$BOLD${my_pass_user}$RESET"
   fi
 }
 step_postgres() {
   if [ "$NO_POSTGRES" != "true" ]; then
-    echo ''
+    install postgresql postgresql-contrib
+    pg_ctlcluster 11 main start
+
+    runuser -l postgres -c "psql -c \"CREATE ROLE ${user} CREATEDB CREATEROLE\""
+    runuser -l postgres -c "psql -c \"ALTER USER ${user} PASSWORD '${pg_pass_user}';\""
+    runuser -l postgres -c "psql -c \"ALTER USER postgres PASSWORD '${pg_pass_root}';\""
+
+    usermod -p $(openssl passwd -1 "$pg_pass") postgres
+
+    add_to_report "System,$RED${BOLD}postgres$RESET,$RED$BOLD${pg_pass}$RESET"
+    add_to_report "PostgreSQL,$RED${BOLD}postgres$RESET,$RED$BOLD${pg_pass_root}$RESET"
+    add_to_report "PostgreSQL,$RED${BOLD}${user}$RESET,$RED$BOLD${pg_pass_user}$RESET"
+
   fi
 }
 step_supervisor() {
   if [ "$NO_SUPERVISOR" != "true" ]; then
+
     echo ''
+
   fi
 }
 step_lets_encrypt() {
@@ -469,8 +488,12 @@ parse_arguments() {
       user="${1#*=}"
       shift 1
       ;;
-    --pass=*) # set the user password (default is random)
+    --pass=*) # set the system user password (default is random)
       pass="${1#*=}"
+      shift 1
+      ;;
+    --pg-pass=*) # set the system postgres user password (default is random)
+      pg_pass="${1#*=}"
       shift 1
       ;;
     --my-pass-root=*) # set the mysql root password (default is random)
@@ -481,7 +504,15 @@ parse_arguments() {
       my_pass_user="${1#*=}"
       shift 1
       ;;
-    --user | --pass | --my-pass-root | --my-pass-user) error "$1 requires an argument" ;;
+    --pg-pass-root=*) # set the pg root password (default is random)
+      pg_pass_root="${1#*=}"
+      shift 1
+      ;;
+    --pg-pass-user=*) # set the pg user password (default is random)
+      pg_pass_user="${1#*=}"
+      shift 1
+      ;;
+    --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user) error "$1 requires an argument" ;;
 
     -*)
       error "unknown option: $1" >&2
