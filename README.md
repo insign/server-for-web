@@ -5,7 +5,7 @@ One-time fully automated shell script to install all needed software to run Lara
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
 </p>
 
->To understand what is installed, check Options section
+>To understand what is installed, check [Parameters](#parameters-all-optional) section
 
 ### Recommended requisites
 - **Ubuntu 18.04 LTS** ~~or at least newer~~ (not recommended)
