@@ -94,6 +94,7 @@ bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
 - [ ] Support for multiple php versions https://github.com/wilmoore/php-version
 - [ ] Install mosh as alternative of ssh
 - [ ] One-parameter group for every possible (web,cache,db,queue)
+- [ ] Command to add sites, create db user and db, add ssl
 - [ ] Send report via e-mail
   - [ ] Hide report at the end
   - [ ] Hide more our warning/info/success
