@@ -64,18 +64,27 @@ bash install.sh
 * `--no-lets-encrypt` - ~~don't install or configure let's encrypt / certbot~~
 
 ## Examples
-### Web Server (with nginx & php)
+### Web Server
+#### with nginx & php
 ```shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)" "" --no-mysql --no-postgres
+bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-postgres
 ```
 ### Database Server
->Soon
+> We don't auto allow any port to remote connection. You should prefer private networking.
+#### with mysql
+```shell
+bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-nginx --no-php --no-postgres
+```
+#### with postgresql
+```shell
+bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
+```
 ### Cache Server
 >Soon
 
 
 ## Roadmap
-- [ ] Finish postgresql installation
+- [X] Finish postgresql installation
 - [ ] Finish Let's Encrypt installation
 - [ ] Finish supervisord installation
 - [ ] Enable better gzip config for nginx by default
