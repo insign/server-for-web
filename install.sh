@@ -303,7 +303,7 @@ step_mysql() {
 }
 step_postgres() {
   if [ "$NO_POSTGRES" != "true" ]; then
-    install postgresql postgresql-contrib
+    install postgresql-11
     pg_ctlcluster 11 main start
 
     runuser -l postgres -c "psql -c \"CREATE ROLE ${user} CREATEDB CREATEROLE\""
