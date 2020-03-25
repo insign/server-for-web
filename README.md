@@ -86,7 +86,7 @@ bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
 ## Roadmap
 - [X] Finish postgresql installation
 - [ ] Finish Let's Encrypt installation
-- [ ] Finish supervisord installation
+- [X] Finish supervisord installation
 - [ ] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
 - [ ] Import private key
