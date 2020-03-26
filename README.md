@@ -1,5 +1,5 @@
 # server-for-laravel
-One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Let's Encrypt/Certbot. Optional parameters available.
+One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt). Optional parameters available.
 
 <p align="center">
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
@@ -59,9 +59,7 @@ bash install.sh
 * `--pg-pass` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
 * `--pg-pass-root` - set the pg postgres user password. Default is _random_ (shown at the end)
 * `--pg-pass-user` - set the pg user password. Default is _random_ (shown at the end)
-
->Soon
-* `--no-lets-encrypt` - ~~don't install or configure let's encrypt / certbot~~
+* `--no-certbot` - don't install or configure certbot (let's encrypt)
 
 ## Examples
 ### Web Server
@@ -85,7 +83,7 @@ bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
 
 ## Roadmap
 - [X] Finish postgresql installation
-- [ ] Finish Let's Encrypt installation
+- [ ] Finish Certbot installation
 - [X] Finish supervisord installation
 - [ ] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
@@ -109,8 +107,3 @@ You are welcome, just do a PR with some explanation.
 
 ## License
 > Licensed under GNU LESSER GENERAL PUBLIC LICENSE. Check the [GNU GPL3 License](./LICENSE) file for more details.
-
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbNTM4MTI2NzUwLC05OTYzMjQzMDcsLTg2Nj
-gxMjI0MywtOTk2MzI0MzA3XX0=
--->

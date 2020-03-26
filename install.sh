@@ -324,9 +324,9 @@ step_supervisor() {
     service supervisor restart
   fi
 }
-step_lets_encrypt() {
-  if [ "$NO_LETS" != "true" ]; then
-    echo ''
+step_certbot() {
+  if [ "$NO_CERTBOT" != "true" ]; then
+    install certbot python-certbot-nginx python3-certbot-dns-cloudflare
   fi
 }
 
@@ -390,7 +390,7 @@ step_initial() {
   fi
 
   if [ "$SKIP_UPDATES" != "true" ]; then
-    info Updates and Upgrade
+    info Updates and Upgrades...
 
     install locales language-pack-en-base software-properties-common build-essential
     export LC_ALL=en_US.UTF-8
@@ -408,12 +408,16 @@ step_initial() {
     curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 
     # PHP
-    LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php # forces apt update
+    LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
 
     # MariaDB
     apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-    add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu bionic main' # forces apt update
+    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu bionic main' # forces apt update
 
+    # CERTBot
+    add-apt-repository -yn ppa:certbot/certbot
+
+    apt update
     apt upgrade -y
   fi
 
@@ -483,8 +487,8 @@ parse_arguments() {
       NO_POSTGRES="true"
       shift 1
       ;;
-    --no-lets-encrypt) # don't install or configure let's encrypt / certbot (Unlike default behavior)
-      NO_LETS="true"
+    --no-certbot) # don't install or configure certbot (let's encrypt) (Unlike default behavior)
+      NO_CERTBOT="true"
       shift 1
       ;;
     --user=*) # set the username (instead default)
@@ -547,7 +551,7 @@ main() {
   step_mysql # Actually, it's MariaDB
   step_postgres
   step_supervisor
-  step_lets_encrypt
+  step_certbot
 
   step_final
 
