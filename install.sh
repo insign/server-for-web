@@ -356,11 +356,7 @@ step_final() {
 
   show_report
 
-  # If this user's login shell is already "zsh", do not attempt to switch.
-  if [ "$(basename "$SHELL")" = "zsh" ]; then
-    return
-  fi
-  exec zsh -l
+  su "$user"
 }
 
 setup_color() {
