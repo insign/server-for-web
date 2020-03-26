@@ -406,8 +406,8 @@ step_initial() {
     # PHP
     LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
 
-    # MariaDB
-    apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+    # MariaDB 10.4
+    apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
 
     # CERTBot
