@@ -102,6 +102,7 @@ bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
   - [ ] Run quiet installation with minimum verbosity
   - [ ] Reboot after done
 - [ ] Count time passed during installation
+- [ ] Add CI for this script.
 
 ## Contributing
 You are welcome, just do a PR with some explanation.
