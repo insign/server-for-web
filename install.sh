@@ -531,27 +531,44 @@ parse_arguments() {
 }
 
 main() {
-
   setup_color
   call_vars
   others_checks
 
   parse_arguments "$@"
 
+  info Initial actions....
   step_initial
 
+  info Creating user
   step_user_creation
+
+  info Installing UFW
   step_ufw
+
+  info Installing nginx
   step_nginx
+
+  info Installing php 7.4
   step_php
+
+  info Installing node 12
   step_node
+
+  info Installing MariaDB 10.4
   step_mysql # Actually, it's MariaDB
+
+  info Installing PostgreSQL
   step_postgres
+
+  info Installing supervisor daemon
   step_supervisor
+
+  info "Installing certbot (with CloudFlare plugin)"
   step_certbot
 
+  info Finishing up
   step_final
-
 }
 
 main "$@"
