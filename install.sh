@@ -320,9 +320,9 @@ step_postgres() {
 }
 step_supervisor() {
   if [ "$NO_SUPERVISOR" != "true" ]; then
-
-    echo ''
-
+    install supervisor
+    systemctl enable supervisor.service
+    service supervisor start
   fi
 }
 step_lets_encrypt() {
