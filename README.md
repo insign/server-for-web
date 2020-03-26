@@ -20,13 +20,13 @@ This script is installed by running one of the following commands in your termin
 #### via curl
 
 ```shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+bash -c "$(curl -fsSL https://git.io/Jv9a6)"
 ```
 
 #### via wget
 
 ```shell
-bash -c "$(wget -qO- https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+bash -c "$(wget -qO- https://git.io/Jv9a6)"
 ```
 #### Manual inspection
 
@@ -65,17 +65,17 @@ bash install.sh
 ### Web Server
 #### with nginx & php
 ```shell
-bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-postgres
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres
 ```
 ### Database Server
 > We don't auto allow any port to remote connection. You should prefer private networking.
 #### with mysql
 ```shell
-bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-nginx --no-php --no-postgres
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres
 ```
 #### with postgresql
 ```shell
-bash -c "$(curl -fsSL OUR_LONG_LINK_HERE)" "" --no-mysql --no-nginx --no-php
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php
 ```
 ### Cache Server
 >Soon

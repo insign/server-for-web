@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 # This script should be run via curl:
-#   bash -c "$(curl -fsSL https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+#   bash -c "$(curl -fsSL https://git.io/Jv9a6)"
 # or wget:
-#   bash -c "$(wget -qO- https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh)"
+#   bash -c "$(wget -qO- https://git.io/Jv9a6)"
 #
 # As an alternative, you can first download the install script and run it afterwards:
 #   wget https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh
