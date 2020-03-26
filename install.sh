@@ -408,7 +408,7 @@ step_initial() {
 
     # MariaDB
     apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu bionic main' # forces apt update
+    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
 
     # CERTBot
     add-apt-repository -yn ppa:certbot/certbot
