@@ -57,7 +57,7 @@ error() {
 }
 
 info() {
-  echo -e "$BLUE""$@""$RESET" >&2
+  echo -e "$GREEN""$BOLD"SERVER FOR LARAVEL:"$RESET $BLUE""$@""$RESET" >&2
 }
 warning() {
   echo -e "$YELLOW""Warning: $@""$RESET" >&2
@@ -268,13 +268,15 @@ step_mysql() {
   if [ "$NO_MYSQL" != "true" ]; then
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
-    install mariadb-server-10.3
+    install mariadb-server-10.4
     expect -c "
         set timeout 3
         spawn mysql_secure_installation
 
         expect \"Enter current password for root (enter for none):\"
         send -- \"${my_pass_root}\r\"
+        expect \"Switch to unix_socket authentication\"
+        send -- \"n\r\"
         expect \"Set root password?\"
         send -- \"n\r\"
         expect \"Remove anonymous users?\"
@@ -400,9 +402,6 @@ step_initial() {
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
-    # node / npm
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-
     # PHP
     LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
 
@@ -413,8 +412,10 @@ step_initial() {
     # CERTBot
     add-apt-repository -yn ppa:certbot/certbot
 
-    apt update
-    apt upgrade -y
+    # node / npm
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+
+    apt update && apt upgrade -y
   fi
 
   info Installing zsh and other basics...
