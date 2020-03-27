@@ -1,5 +1,5 @@
 # server-for-laravel
-One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd. Optional parameters available.
+One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd, fail2ban, mosh. Optional parameters available.
 
 <p align="center">
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
@@ -7,7 +7,7 @@ One-time fully automated shell script to install all needed software to run Lara
 
 >To understand what is installed, check [Parameters](#parameters-all-optional) section
 
-### Recommended requisites
+### Requisites
 - **Ubuntu 18.04 LTS**
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
@@ -50,7 +50,7 @@ bash install.sh
 * `--skip-swap` - skip creation swapfile (not recommended unless already exists)
 * `--swap-size` - set swap file size in MB. Default is 2048 (2GB)
 * `--skip-updates` - Skip updates and upgrade the system (not recommended)
-* `--no-omz` - don't install oh-my-zsh framework (not recommended)
+* `--no-omz` - don't install [oh-my-zsh](https://ohmyz.sh/) framework (not recommended)
 * `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative) (not recommended)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
 * `--no-nginx` - don't install or configure nginx
