@@ -394,8 +394,14 @@ step_redis() {
 
 step_final() {
   if [ "$NO_OMZ" != "true" ]; then
-    info Installing ohmyzsh...
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+  fi
+
+  if [ "$NO_MOSH" != "true" ]; then
+    install mosh
+    if command_exists ufw; then
+      ufw allow 60000:61000/udp
+    fi
   fi
 
   apt purge -y expect
@@ -465,6 +471,10 @@ parse_arguments() {
       ;;
     --no-omz) # don't install oh-my-zsh framework (Unlike default behavior)
       NO_OMZ="true"
+      shift 1
+      ;;
+    --no-mosh) # don't install mosh (ssh alternative) (Unlike default behavior)
+      NO_MOSH="true"
       shift 1
       ;;
     --no-ufw) # don't install or configure UFW firewall (Unlike default behavior)

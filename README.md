@@ -8,7 +8,7 @@ One-time fully automated shell script to install all needed software to run Lara
 >To understand what is installed, check [Parameters](#parameters-all-optional) section
 
 ### Recommended requisites
-- **Ubuntu 18.04 LTS** ~~or at least newer~~ (not recommended)
+- **Ubuntu 18.04 LTS**
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
 - a **_new server_**. We are not responsible for any loss you may suffer.
@@ -51,6 +51,7 @@ bash install.sh
 * `--swap-size` - set swap file size in MB. Default is 2048 (2GB)
 * `--skip-updates` - Skip updates and upgrade the system (not recommended)
 * `--no-omz` - don't install oh-my-zsh framework (not recommended)
+* `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative) (not recommended)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
 * `--no-nginx` - don't install or configure nginx
 * `--no-php` - don't install or configure php
@@ -86,6 +87,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 ```shell
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-postgres --no-certbot
 ```
+### Queue Server
+>soon
 
 
 ## Roadmap
@@ -103,7 +106,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Import private key
 - [ ] Remove password login (ssh key only)
 - [ ] Support for multiple php versions https://github.com/wilmoore/php-version
-- [ ] Install mosh as alternative of ssh
+- [X] Install mosh as alternative of ssh
 - [ ] One-parameter group for every possible (web,cache,db,queue)
 - [ ] Command to add sites, create db user and db, add ssl
 - [ ] Configure nginx as loadbalancer
@@ -119,4 +122,4 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 You are welcome, just do a PR with some explanation.
 
 ## License
-> Licensed under GNU LESSER GENERAL PUBLIC LICENSE. Check the [GNU GPL3 License](./LICENSE) file for more details.
+> Licensed under lgpl3.0. Check the [GNU GPL3 License](./LICENSE) file for more details.
