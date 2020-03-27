@@ -66,6 +66,8 @@ bash install.sh
 * `--no-certbot` - don't install or configure certbot (let's encrypt)
 * `--no-redis` - don't install or configure redis-server
 * `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
+* `--no-memcached` - don't install or configure memcached
+* `--no-beanstalkd` - don't install or configure beanstalkd
 
 ## Examples
 ### Web Server
@@ -96,11 +98,10 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
 - [X] Finish Redis server installation
-- [ ] Finish Memcached installation
-- [ ] Finish Beanstalkd installation
+- [X] Finish Memcached installation
+- [X] Finish Beanstalkd installation
 - [X] Finish fail2ban installation
 - [ ] Use fail2ban to protect nginx
-- [ ] Fix postgres time
 - [ ] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
 - [ ] Import private key
@@ -112,7 +113,6 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Configure nginx as loadbalancer
 - [ ] Send report via e-mail
   - [ ] Hide report at the end
-  - [ ] Hide more our warning/info/success
   - [ ] Run quiet installation with minimum verbosity
   - [ ] Reboot after done
 - [ ] Count time passed during installation
@@ -122,4 +122,4 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 You are welcome, just do a PR with some explanation.
 
 ## License
-> Licensed under lgpl3.0. Check the [GNU GPL3 License](./LICENSE) file for more details.
+> Licensed under lgpl-3.0. Check the [GNU GPL3 License](./LICENSE) file for more details.

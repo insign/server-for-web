@@ -229,13 +229,15 @@ step_initial() {
 
   info Installing zsh and other basics...
   install zsh curl wget zip unzip expect fail2ban
-  snap install micro --classic
+
+  curl https://getmic.ro | bash
+  mv ./micro /usr/bin/micro
 
   add_to_report "TYPE,USER,PASSWORD"
 }
 
 step_user_creation() {
-  add_to_report "System,root,untouched"
+  add_to_report "System,root,(untouched)"
   if [ "$CREATE_NEW_USER" != "false" ]; then
     if [ $(getent passwd "$user") ]; then
       if [ "$KEEP_EXISTING_USER" != "true" ]; then
@@ -291,7 +293,7 @@ step_nginx() {
 }
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
-    install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis}
+    install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis,memcached}
     install php
 
     runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
@@ -389,6 +391,22 @@ step_redis() {
     echo "requirepass $redis_pass" >>/etc/redis/redis.conf
     add_to_report "Redis,(none),$RED$BOLD$redis_pass$RESET"
     service redis-server restart
+  fi
+}
+
+step_memcached() {
+  if [ "$NO_MEMCACHED" != "true" ]; then
+    install memcached libmemcached-tools
+    sed -i 's/-l 127.0.0.1/-l 0.0.0.0/' /etc/memcached.conf
+    service memcached restart
+  fi
+}
+
+step_beanstalkd() {
+  if [ "$NO_BEANSTALKD" != "true" ]; then
+    install beanstalkd
+    sed -i "s/BEANSTALKD_LISTEN_ADDR.*/BEANSTALKD_LISTEN_ADDR=0.0.0.0/" /etc/default/beanstalkd
+    service beanstalkd restart
   fi
 }
 
@@ -509,6 +527,14 @@ parse_arguments() {
       NO_REDIS="true"
       shift 1
       ;;
+    --no-memcached) # don't install or configure memcached (Unlike default behavior)
+      NO_MEMCACHED="true"
+      shift 1
+      ;;
+    --no-beanstalkd) # don't install or configure beanstalkd (Unlike default behavior)
+      NO_BEANSTALKD="true"
+      shift 1
+      ;;
     --user=*) # set the username (instead default)
       user="${1#*=}"
       shift 1
@@ -562,31 +588,31 @@ main() {
 
   parse_arguments "$@"
 
-  info Initial actions....
+  info "Initial actions...."
   step_initial
 
-  info Creating user
+  info "Creating user"
   step_user_creation
 
-  info Installing UFW
+  info "Installing UFW"
   step_ufw
 
-  info Installing nginx
+  info "Installing nginx"
   step_nginx
 
-  info Installing php 7.4
+  info "Installing php 7.4"
   step_php
 
-  info Installing node 12
+  info "Installing node 12"
   step_node
 
-  info Installing MariaDB 10.4
+  info "Installing MariaDB 10.4"
   step_mysql # Actually, it's MariaDB
 
-  info Installing PostgreSQL
+  info "Installing PostgreSQL"
   step_postgres
 
-  info Installing supervisor daemon
+  info "Installing supervisor daemon"
   step_supervisor
 
   info "Installing certbot (with CloudFlare plugin)"
@@ -595,7 +621,13 @@ main() {
   info "Installing Redis"
   step_redis
 
-  info Finishing up
+  info "Installing Memcached"
+  step_memcached
+
+  info "Installing beanstalkd"
+  step_beanstalkd
+
+  info "Finishing up"
   step_final
 }
 
