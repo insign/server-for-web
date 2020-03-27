@@ -228,7 +228,7 @@ step_initial() {
   fi
 
   info Installing zsh and other basics...
-  install zsh curl wget zip unzip expect fail2ban
+  install zsh curl wget zip unzip expect fail2ban xclip
 
   curl https://getmic.ro | bash
   mv ./micro /usr/bin/micro
@@ -281,12 +281,34 @@ step_ufw() {
 step_nginx() {
   if [ "$NO_NGINX" != "true" ]; then
     install nginx
-    # TODO enable gzip
+    sed -i 's/# server_names_hash_bucket_size/server_names_hash_bucket_size/' /etc/nginx/nginx.conf
 
     if command_exists ufw; then
-      ufw allow 'Nginx HTTP'
-      ufw allow 'Nginx HTTPS'
+      ufw allow 'Nginx Full'
     fi
+
+    cat >/etc/nginx/conf.d/gzip.conf <<EOF
+gzip_comp_level 6;
+gzip_min_length 256;
+gzip_proxied any;
+gzip_vary on;
+gzip_types
+application/atom+xml
+application/javascript
+application/json
+application/rss+xml
+application/vnd.ms-fontobject
+application/x-font-ttf
+application/x-web-app-manifest+json
+application/xhtml+xml
+application/xml
+font/opentype
+image/svg+xml
+image/x-icon
+text/css
+text/plain
+text/x-component;
+EOF
 
     service nginx restart
   fi

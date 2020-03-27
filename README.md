@@ -102,11 +102,11 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Finish Beanstalkd installation
 - [X] Finish fail2ban installation
 - [ ] Use fail2ban to protect nginx
-- [ ] Enable better gzip config for nginx by default
+- [X] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
 - [ ] Import private key
 - [ ] Remove password login (ssh key only)
-- [ ] Support for multiple php versions https://github.com/wilmoore/php-version
+- [ ] Support for multiple [php versions](https://github.com/phpbrew/phpbrew)
 - [X] Install mosh as alternative of ssh
 - [ ] One-parameter group for every possible (web,cache,db,queue)
 - [ ] Command to add sites, create db user and db, add ssl
