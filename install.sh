@@ -13,8 +13,6 @@ set -e
 
 # Other options
 call_vars() {
-  BLOCK_PW=${BLOCK_PW:-yes}
-  MOSH=${MOSH:-yes}
   swapsize=${swapsize:-2048}
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
@@ -25,6 +23,8 @@ call_vars() {
 
   pg_pass_root=${pg_pass_root:=$(random_string)}
   pg_pass_user=${pg_pass_user:=$(random_string)}
+
+  redis_pass=${redis_pass:=$(random_string)}
 
   REPORT=''
 }
@@ -177,6 +177,63 @@ others_checks() {
   fi
 }
 
+step_initial() {
+  export DEBIAN_FRONTEND=noninteractive
+
+  if [ "$SKIP_SWAP" != "true" ]; then
+    info "Creating swapfile of $swapsize mb..."
+    if [[ $(swapon --show) ]]; then
+      swapoff /swapfile
+      rm /swapfile
+    fi
+    dd if=/dev/zero of=/swapfile bs=1M count=$swapsize
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    swapon -s # status
+  fi
+
+  if [ "$SKIP_UPDATES" != "true" ]; then
+    info Updates and Upgrades...
+
+    install locales language-pack-en-base software-properties-common build-essential
+    export LC_ALL=en_US.UTF-8
+    export LANG=en_US.UTF-8
+
+    # postgresql
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+    # yarn
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
+    # PHP
+    LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
+
+    # MariaDB 10.4
+    apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
+
+    # CERTBot
+    add-apt-repository -yn ppa:certbot/certbot
+
+    # Redis Server
+    add-apt-repository -yn ppa:chris-lea/redis-server
+
+    # node / npm
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+
+    apt update && apt upgrade -y
+  fi
+
+  info Installing zsh and other basics...
+  install zsh curl wget zip unzip expect fail2ban
+  snap install micro --classic
+
+  add_to_report "TYPE,USER,PASSWORD"
+}
+
 step_user_creation() {
   add_to_report "System,root,untouched"
   if [ "$CREATE_NEW_USER" != "false" ]; then
@@ -317,9 +374,21 @@ step_supervisor() {
     service supervisor restart
   fi
 }
+
 step_certbot() {
   if [ "$NO_CERTBOT" != "true" ]; then
     install certbot python-certbot-nginx python3-certbot-dns-cloudflare
+  fi
+}
+
+step_redis() {
+  if [ "$NO_REDIS" != "true" ]; then
+    install redis-server
+
+    sed -i 's/bind 127.0.0.1/bind 0.0.0.0/' /etc/redis/redis.conf
+    echo "requirepass $redis_pass" >>/etc/redis/redis.conf
+    add_to_report "Redis,(none),$RED$BOLD$redis_pass$RESET"
+    service redis-server restart
   fi
 }
 
@@ -360,59 +429,6 @@ setup_color() {
   BLUE=$(printf '\033[34m')
   BOLD=$(printf '\033[1m')
   RESET=$(printf '\033[m')
-}
-
-step_initial() {
-  export DEBIAN_FRONTEND=noninteractive
-
-  if [ "$SKIP_SWAP" != "true" ]; then
-    info "Creating swapfile of $swapsize mb..."
-    if [[ $(swapon --show) ]]; then
-      swapoff /swapfile
-      rm /swapfile
-    fi
-    dd if=/dev/zero of=/swapfile bs=1M count=$swapsize
-    chmod 600 /swapfile
-    mkswap /swapfile
-    swapon /swapfile
-    swapon -s # status
-  fi
-
-  if [ "$SKIP_UPDATES" != "true" ]; then
-    info Updates and Upgrades...
-
-    install locales language-pack-en-base software-properties-common build-essential
-    export LC_ALL=en_US.UTF-8
-    export LANG=en_US.UTF-8
-
-    # postgresql
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
-    # yarn
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-
-    # PHP
-    LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
-
-    # MariaDB 10.4
-    apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
-    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
-
-    # CERTBot
-    add-apt-repository -yn ppa:certbot/certbot
-
-    # node / npm
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-
-    apt update && apt upgrade -y
-  fi
-
-  info Installing zsh and other basics...
-  install zsh curl wget zip unzip expect fail2ban
-
-  add_to_report "TYPE,USER,PASSWORD"
 }
 
 parse_arguments() {
@@ -479,6 +495,10 @@ parse_arguments() {
       NO_CERTBOT="true"
       shift 1
       ;;
+    --no-redis) # don't install or configure redis server (Unlike default behavior)
+      NO_REDIS="true"
+      shift 1
+      ;;
     --user=*) # set the username (instead default)
       user="${1#*=}"
       shift 1
@@ -507,7 +527,11 @@ parse_arguments() {
       pg_pass_user="${1#*=}"
       shift 1
       ;;
-    --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user) error "$1 requires an argument" ;;
+    --redis-pass=*) # set the redis master password (default is random)
+      redis_pass="${1#*=}"
+      shift 1
+      ;;
+    --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
 
     -*)
       error "unknown option: $1" >&2
@@ -557,6 +581,9 @@ main() {
 
   info "Installing certbot (with CloudFlare plugin)"
   step_certbot
+
+  info "Installing Redis"
+  step_redis
 
   info Finishing up
   step_final

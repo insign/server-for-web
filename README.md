@@ -1,5 +1,5 @@
 # server-for-laravel
-One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt). Optional parameters available.
+One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis. Optional parameters available.
 
 <p align="center">
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
@@ -60,32 +60,41 @@ bash install.sh
 * `--pg-pass-root` - set the pg postgres user password. Default is _random_ (shown at the end)
 * `--pg-pass-user` - set the pg user password. Default is _random_ (shown at the end)
 * `--no-certbot` - don't install or configure certbot (let's encrypt)
+* `--no-redis` - don't install or configure redis-server
+* `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
 
 ## Examples
 ### Web Server
 #### with nginx & php
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis
 ```
 ### Database Server
 > We don't auto allow any port to remote connection. You should prefer private networking.
 #### with mysql
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-certbot
 ```
 #### with postgresql
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-certbot
 ```
 ### Cache Server
->Soon
+```shell
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-postgres --no-certbot
+```
 
 
 ## Roadmap
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
-- [ ] Finish Redis server installation
+- [X] Finish Redis server installation
+- [ ] Finish Memcached installation
+- [ ] Finish Beanstalkd installation
+- [X] Finish fail2ban installation
+- [ ] Use fail2ban to protect nginx
+- [ ] Fix postgres time
 - [ ] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
 - [ ] Import private key
