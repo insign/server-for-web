@@ -1,5 +1,5 @@
 # server-for-laravel
-One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis. Optional parameters available.
+One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd. Optional parameters available.
 
 <p align="center">
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
@@ -11,7 +11,10 @@ One-time fully automated shell script to install all needed software to run Lara
 - **Ubuntu 18.04 LTS** ~~or at least newer~~ (not recommended)
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
-- a new server. We are not responsible for any loss you may suffer. 
+- a **_new server_**. We are not responsible for any loss you may suffer.
+
+> Without a new server, the script possible will ask things to replace files. Never recommended.
+
 ### Basic Installation
 
 This script is installed by running one of the following commands in your terminal. You can install this via the command-line with either `curl` or `wget`.
