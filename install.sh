@@ -190,7 +190,7 @@ step_user_creation() {
       fi
     fi
 
-    useradd "$user" -m -p $(openssl passwd -1 "$pass") -s $(which zsh)
+    useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
 
@@ -210,18 +210,9 @@ step_ufw() {
     ufw allow 22/tcp
     ufw allow 80/tcp
     ufw allow 443/tcp
-    if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-      expect -c "
-        set timeout 3
-        spawn ufw enable
 
-        expect \"Command may disrupt existing ssh connections\"
-        send -- \"y\r\"
-        expect eof
-"
-    else
-      ufw enable
-    fi
+    ufw --force enable
+
     ufw logging on
 
     ufw status
@@ -358,7 +349,7 @@ step_final() {
 
   show_report
 
-  su "$user"
+  su -l "$user"
 }
 
 setup_color() {
@@ -419,7 +410,7 @@ step_initial() {
   fi
 
   info Installing zsh and other basics...
-  install zsh curl wget zip unzip expect
+  install zsh curl wget zip unzip expect fail2ban
 
   add_to_report "TYPE,USER,PASSWORD"
 }

@@ -83,8 +83,9 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php
 
 ## Roadmap
 - [X] Finish postgresql installation
-- [ ] Finish Certbot installation
+- [X] Finish Certbot installation
 - [X] Finish supervisord installation
+- [ ] Finish Redis server installation
 - [ ] Enable better gzip config for nginx by default
 - [ ] Generate ssh key
 - [ ] Import private key
