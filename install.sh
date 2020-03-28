@@ -184,6 +184,8 @@ others_checks() {
 step_initial() {
   export DEBIAN_FRONTEND=noninteractive
 
+  apt update
+
   if [ "$SKIP_SWAP" != "true" ]; then
     info "Creating swapfile of $swapsize mb..."
     if [[ $(swapon --show) ]]; then
