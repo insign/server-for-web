@@ -36,6 +36,10 @@ add_to_report() {
 show_report() {
   printTable ',' "$REPORT" 'true'
 
+  show_public_key
+
+  show_private_key
+
   warning "Lose this data then go cry to you mom."
 }
 
@@ -251,10 +255,51 @@ step_user_creation() {
 
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
+    
+    mkdir -p /home/$user/.ssh
+
+    ssh-keygen -f /home/$user/.ssh/id_rsa -t rsa -N ''
+
+    ssh-keyscan -H github.com >> /home/$user/.ssh/known_hosts
+    ssh-keyscan -H bitbucket.org >> /home/$user/.ssh/known_hosts
+    ssh-keyscan -H gitlab.com >> /home/$user/.ssh/known_hosts
+
+    touch /home/$user/.ssh/authorized_keys
+    cat /home/$user/.ssh/id_rsa.pub > /home/$user/.ssh/authorized_keys
+
+    chown -R $user:$user /home/$user
+    chmod -R 755 /home/$user
+    chmod 700 /home/$user/.ssh/id_rsa
+
+    # Disable Password Authentication Over SSH
+
+    sed -i "/PasswordAuthentication yes/d" /etc/ssh/sshd_config
+    echo "" | sudo tee -a /etc/ssh/sshd_config
+    echo "" | sudo tee -a /etc/ssh/sshd_config
+    echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
+
+    # Restart SSH
+
+    ssh-keygen -A
+    service ssh restart
+
     success User created: "$BLUE""$BOLD""$user"
 
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
+
   fi
+}
+
+show_public_key() {
+  success Public Key
+
+  cat /home/$user/.ssh/id_rsa.pub
+}
+
+show_private_key() {
+  success Private Key
+
+  cat /home/$user/.ssh/id_rsa
 }
 
 step_ufw() {
