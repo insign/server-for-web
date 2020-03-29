@@ -47,6 +47,7 @@ command_exists() {
   command -v "$@" >/dev/null 2>&1
 }
 
+
 install() {
   LC_ALL=C.UTF-8 apt-fast install -y "$@"
 }
