@@ -412,17 +412,7 @@ step_php() {
 
     runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
 
-    echo a
-    if [ ! -z "\$(ps aux | grep php-fpm | grep -v grep)" ]; then
-      service php7.4-fpm restart >/dev/null 2>&1
-      service php7.3-fpm restart >/dev/null 2>&1
-      service php7.2-fpm restart >/dev/null 2>&1
-      service php7.1-fpm restart >/dev/null 2>&1
-      service php7.0-fpm restart >/dev/null 2>&1
-      service php5.6-fpm restart >/dev/null 2>&1
-      service php5-fpm restart >/dev/null 2>&1
-    fi
-    echo b
+    service php7.4-fpm restart
   fi
 }
 step_node() {
