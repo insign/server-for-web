@@ -463,6 +463,13 @@ step_mysql() {
 
     add_to_report "MariaDB,$RED${BOLD}root$RESET,$RED$BOLD$my_pass_root$RESET"
 
+    local -r MY_ROOT_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = 'root')")"
+    if [ "$MY_ROOT_EXISTS" = 1 ]; then
+      mysql -uroot -p"$my_pass_root" <<<"ALTER USER 'root'@'%' IDENTIFIED BY '$my_pass_root';"
+    else
+      mysql -uroot -p"$my_pass_root" <<<"CREATE USER 'root'@'%' IDENTIFIED BY '$my_pass_root';"
+    fi
+
     local -r MY_USER_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
       mysql -uroot -p"$my_pass_root" <<<"ALTER USER '${user}'@'%' IDENTIFIED BY '${my_pass_user}';"
