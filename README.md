@@ -8,7 +8,7 @@ One-time fully automated shell script to install all needed software to run Lara
 Beyond the description, some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
-- Installs some tools: `ncdu`, `awscli`, `whois`, [`httpie`](https://httpie.org/), [mc](http://linuxcommand.org/lc3_adv_mc.php)
+- Installs some tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php)
 - Installs [micro](https://micro-editor.github.io/) editor with clipboard support
 - Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/) framework
 - Creates swap file to avoid lack of memory
