@@ -48,7 +48,7 @@ command_exists() {
 }
 
 install() {
-  LC_ALL=C.UTF-8 apt-fast install -y "$@"
+  apt-fast install -y "$@"
 }
 
 error() {
@@ -235,6 +235,9 @@ step_initial() {
   echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
+  cp completions/zsh/_apt-fast /usr/share/zsh/functions/Completion/Debian/
+  chown root:root /usr/share/zsh/functions/Completion/Debian/_apt-fast
+  source /usr/share/zsh/functions/Completion/Debian/_apt-fast
 
   install zsh curl wget zip unzip expect fail2ban xclip
 
