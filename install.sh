@@ -14,6 +14,8 @@ set -e
 # Other options
 call_vars() {
   swapsize=${swapsize:-2048}
+  KEY_ONLY=${KEY_ONLY:-false}
+
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
   pg_pass=${pg_pass:=$(random_string)}
@@ -46,7 +48,6 @@ random_string() {
 command_exists() {
   command -v "$@" >/dev/null 2>&1
 }
-
 
 install() {
   LC_ALL=C.UTF-8 apt-fast install -y "$@"
@@ -180,6 +181,7 @@ others_checks() {
 
 step_initial() {
   export DEBIAN_FRONTEND=noninteractive
+  ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
   if [ "$SKIP_SWAP" != "true" ]; then
     info "Creating swapfile of $swapsize mb..."
@@ -236,16 +238,19 @@ step_initial() {
   echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
-  cp completions/zsh/_apt-fast /usr/share/zsh/functions/Completion/Debian/
-  chown root:root /usr/share/zsh/functions/Completion/Debian/_apt-fast
-  source /usr/share/zsh/functions/Completion/Debian/_apt-fast
 
-  install zsh curl wget zip unzip expect fail2ban xclip
+  install zsh curl wget zip unzip expect fail2ban xclip whois awscli httpie
 
   curl https://getmic.ro | bash
   mv ./micro /usr/bin/micro
 
   add_to_report "TYPE,USER,PASSWORD"
+}
+
+step_ssh() {
+  if [ "$KEY_ONLY" != "false" ]; then
+    echo -e "# User provided key\n${KEY_ONLY}\n\n" >> ~root/.ssh/authorized_keys
+  fi
 }
 
 step_user_creation() {
@@ -265,7 +270,9 @@ step_user_creation() {
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
 
-    add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
+    if [ "$KEY_ONLY" != "false" ]; then
+      cp ~root/.ssh/authorized_keys ~${user}/.ssh/authorized_keys
+    fi
   fi
 }
 
@@ -595,6 +602,10 @@ parse_arguments() {
       NO_BEANSTALKD="true"
       shift 1
       ;;
+    --key-only=*) # set an authorized pub key to enter via ssh and blocks login via password (instead default)
+      KEY_ONLY="${1#*=}"
+      shift 1
+      ;;
     --user=*) # set the username (instead default)
       user="${1#*=}"
       shift 1
@@ -627,7 +638,7 @@ parse_arguments() {
       redis_pass="${1#*=}"
       shift 1
       ;;
-    --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
+    --key-only | --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
 
     -*)
       error "unknown option: $1" >&2
@@ -650,6 +661,9 @@ main() {
 
   info "Initial actions...."
   step_initial
+
+  info "SSH things"
+  step_ssh
 
   info "Creating user"
   step_user_creation
