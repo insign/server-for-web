@@ -5,7 +5,27 @@ One-time fully automated shell script to install all needed software to run Lara
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
 </p>
 
->To understand what is installed, check [Parameters](#parameters-all-optional) section
+Beyond the description, some things that this script does (by default):
+- Enable ubuntu auto-upgrade security releases
+- Installs [micro](https://micro-editor.github.io/) editor with clipboard support
+- Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/) framework
+- Creates swap file to avoid lack of memory
+- Auto-generates secure and easy-to-copy passwords
+- Installs fail2ban
+- Installs and enable ufw
+- Enable better gzip on nginx
+- Configure private network
+- Installs php7.4 (and others versions), many extensions with composer (and [prestissimo](https://github.com/hirak/prestissimo))
+- Secure install MariaDB (mysql) and PostgreSQL
+- Installs supervisor daemon
+- [Certbot](https://certbot.eff.org/) (let's encrypt) with CloudFlare plugin (others available to install)
+- Installs [mosh](https://mosh.org/) as great alternative to ssh
+- Generates server ssh key
+- Import keys from popular git services (github, bitbucket, gitlab)
+
+ 
+
+>To better choose what to install, check [Parameters](#parameters-all-optional) section
 
 ### Requisites
 - **Ubuntu 18.04 LTS**
@@ -85,12 +105,10 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgre
 ```shell
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-certbot
 ```
-### Cache Server
+### Cache Server / Queue Server
 ```shell
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-postgres --no-certbot
 ```
-### Queue Server
->soon
 
 
 ## Roadmap
@@ -101,16 +119,13 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Finish Memcached installation
 - [X] Finish Beanstalkd installation
 - [X] Finish fail2ban installation
-- [ ] Use fail2ban to protect nginx
 - [X] Enable better gzip config for nginx by default
-- [ ] Generate ssh key
+- [X] Import popular git services ssh keys
+- [X] Generate ssh key
 - [ ] Import private key
 - [ ] Remove password login (ssh key only)
-- [ ] Support for multiple [php versions](https://github.com/phpbrew/phpbrew)
+- [X] Support for multiple php versions
 - [X] Install mosh as alternative of ssh
-- [ ] One-parameter group for every possible (web,cache,db,queue)
-- [ ] Command to add sites, create db user and db, add ssl
-- [ ] Configure nginx as loadbalancer
 - [ ] Send report via e-mail
   - [ ] Hide report at the end
   - [ ] Run quiet installation with minimum verbosity

@@ -173,7 +173,7 @@ others_checks() {
   root_required
 
   if [[ $(lsb_release -rs) != "18.04" ]]; then
-    warning "This script was tested only on Ubuntu 18.04 LTS, but let's go ahead..."
+    error "This script was tested only on Ubuntu 18.04 LTS"
   fi
 }
 
@@ -446,6 +446,31 @@ step_final() {
 
   apt purge -y expect
   apt autoremove -y
+
+  mkdir -p /home/laravel/.ssh/
+  ssh-keygen -f /home/"$user"/.ssh/id_rsa -t rsa -N ''
+
+
+  ssh-keyscan -H github.com >>/home/"$user"/.ssh/known_hosts
+  ssh-keyscan -H bitbucket.org >>/home/"$user"/.ssh/known_hosts
+  ssh-keyscan -H gitlab.com >>/home/"$user"/.ssh/known_hosts
+
+# Auto upgrade security
+  cat >>/etc/apt/apt.conf.d/50unattended-upgrades <<EOF
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:38";
+EOF
+
+  cat >/etc/apt/apt.conf.d/10periodic <<EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+
+apt update && apt -y upgrade
 
   echo "$GREEN"
   # http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=DONE!
