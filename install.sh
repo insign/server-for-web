@@ -48,7 +48,7 @@ command_exists() {
 }
 
 install() {
-  LC_ALL=C.UTF-8 apt install -y "$@"
+  LC_ALL=C.UTF-8 apt-fast install -y "$@"
 }
 
 error() {
@@ -200,6 +200,8 @@ step_initial() {
     export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
 
+    add-apt-repository -yn ppa:apt-fast/stable
+
     # postgresql
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -228,6 +230,12 @@ step_initial() {
   fi
 
   info Installing zsh and other basics...
+
+  apt -y install apt-fast
+  echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
+  echo debconf apt-fast/dlflag boolean true | debconf-set-selections
+  echo debconf apt-fast/aptmanager string apt | debconf-set-selections
+
   install zsh curl wget zip unzip expect fail2ban xclip
 
   curl https://getmic.ro | bash
@@ -281,7 +289,6 @@ step_ufw() {
 step_nginx() {
   if [ "$NO_NGINX" != "true" ]; then
     install nginx
-    sed -i 's/# server_names_hash_bucket_size/server_names_hash_bucket_size/' /etc/nginx/nginx.conf
 
     if command_exists ufw; then
       ufw allow 'Nginx Full'
@@ -310,6 +317,9 @@ text/plain
 text/x-component;
 EOF
 
+    sed -i "s/user www-data;/user ${user};/" /etc/nginx/nginx.conf
+    sed -i 's/# server_names_hash_bucket_size/server_names_hash_bucket_size/' /etc/nginx/nginx.conf
+    # sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf # already default
     service nginx restart
   fi
 }
@@ -450,12 +460,11 @@ step_final() {
   mkdir -p /home/laravel/.ssh/
   ssh-keygen -f /home/"$user"/.ssh/id_rsa -t rsa -N ''
 
-
   ssh-keyscan -H github.com >>/home/"$user"/.ssh/known_hosts
   ssh-keyscan -H bitbucket.org >>/home/"$user"/.ssh/known_hosts
   ssh-keyscan -H gitlab.com >>/home/"$user"/.ssh/known_hosts
 
-# Auto upgrade security
+  # Auto upgrade security
   cat >>/etc/apt/apt.conf.d/50unattended-upgrades <<EOF
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
@@ -470,7 +479,7 @@ APT::Periodic::AutocleanInterval "7";
 APT::Periodic::Unattended-Upgrade "1";
 EOF
 
-apt update && apt -y upgrade
+  apt update && apt -y upgrade
 
   echo "$GREEN"
   # http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=DONE!
