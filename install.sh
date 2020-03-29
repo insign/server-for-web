@@ -48,7 +48,7 @@ command_exists() {
 }
 
 install() {
-  apt-fast install -y "$@"
+  LC_ALL=C.UTF-8 apt-fast install -y "$@"
 }
 
 error() {
@@ -196,7 +196,7 @@ step_initial() {
   if [ "$SKIP_UPDATES" != "true" ]; then
     info Updates and Upgrades...
 
-    install locales language-pack-en-base software-properties-common build-essential
+    apt install -y locales language-pack-en-base software-properties-common build-essential
     export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
 
