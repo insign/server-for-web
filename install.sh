@@ -16,6 +16,9 @@ call_vars() {
   swapsize=${swapsize:-2048}
   KEY_ONLY=${KEY_ONLY:-false}
 
+  name=${name:-DevOps}
+  email=${user:-"no-one-@got"}
+
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
   pg_pass=${pg_pass:=$(random_string)}
@@ -239,27 +242,28 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh curl wget zip unzip expect fail2ban xclip whois awscli httpie
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc
+
+  git config --global user.name "$name"
+  git config --global user.email "$email"
 
   curl https://getmic.ro | bash
   mv ./micro /usr/bin/micro
 
-  add_to_report "TYPE,USER,PASSWORD"
-}
-
-step_ssh() {
-  if [ "$KEY_ONLY" != "false" ]; then
-    echo -e "# User provided key\n${KEY_ONLY}\n\n" >> ~root/.ssh/authorized_keys
-  fi
+  add_to_report 'TYPE,USER,PASSWORD'
 }
 
 step_user_creation() {
+  if [ "$KEY_ONLY" != "false" ]; then
+    echo -e "# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
+  fi
+
   add_to_report "System,root,(untouched)"
   if [ "$CREATE_NEW_USER" != "false" ]; then
     if [ $(getent passwd "$user") ]; then
       if [ "$KEEP_EXISTING_USER" != "true" ]; then
-        info Deleting current user: "$GREEN""$BOLD""$user""$RESET"
-        userdel -r $user
+        info Deleting current user: "$GREEN$BOLD$user$RESET"
+        userdel -r "$user"
         success Deleted.
       else
         error user already exists, remove --keep-existing-user or choose another: "$GREEN""$BOLD""$user""$RESET"
@@ -270,8 +274,22 @@ step_user_creation() {
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
 
+    mkdir -p "~$user/.ssh/"
+
+    chown -R "$user:$user" "~$user"
+    chmod -R 755 "~$user"
+
+    runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
+    chmod 700 "~$user/.ssh/id_rsa"
+
+    (
+      ssh-keyscan -H github.com
+      ssh-keyscan -H bitbucket.org
+      ssh-keyscan -H gitlab.com
+    ) >>"~$user/.ssh/known_hosts"
+
     if [ "$KEY_ONLY" != "false" ]; then
-      cp ~root/.ssh/authorized_keys ~${user}/.ssh/authorized_keys
+      cp ~root/.ssh/authorized_keys "~$user/.ssh/authorized_keys"
     fi
   fi
 }
@@ -328,33 +346,88 @@ text/plain
 text/x-component;
 EOF
 
-    sed -i "s/user www-data;/user ${user};/" /etc/nginx/nginx.conf
-    sed -i 's/# server_names_hash_bucket_size/server_names_hash_bucket_size/' /etc/nginx/nginx.conf
+    sed -i "s/user www-data;/user $user;/" /etc/nginx/nginx.conf
     # sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf # already default
+    sed -i "s/# multi_accept.*/multi_accept on;/" /etc/nginx/nginx.conf
+    sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 128;/" /etc/nginx/nginx.conf
+
+    openssl dhparam -out /etc/nginx/dhparams.pem 2048
+
+    rm /etc/nginx/sites-{available,enabled}/default
+
+    cat >/etc/nginx/sites-available/catch-all <<EOF
+server {
+    return 404;
+}
+EOF
+
+    ln -s /etc/nginx/sites-{available,enabled}/catch-all
+
+    usermod -aG www-data "$user"
+
     service nginx restart
   fi
 }
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
-    install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis,memcached}
+    echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
+    (
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.3-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.1-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.0-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php5.6-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
+    ) >>/etc/sudoers.d/php-fpm
+
+    install php-{common,cli,fpm,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
     install php
 
-    runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
-    runuser -l $user -c $'php composer-setup.php'
-    runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/cli/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/cli/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/cli/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/cli/php.ini
 
-    local -r user_homedir=$(runuser -l $user -c $'pwd')
-    mv $user_homedir/composer.phar /usr/local/bin/composer
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/fpm/php.ini
+
+    sed -i "s/^user = www-data/user = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/^group = www-data/group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.owner.*/listen.owner = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.group.*/listen.group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;request_terminate_timeout.*/request_terminate_timeout = 60/" /etc/php/7.4/fpm/pool.d/www.conf
+
+    chmod 733 /var/lib/php/sessions
+    chmod +t /var/lib/php/sessions
+
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
 
     runuser -l $user -c $'composer global require hirak/prestissimo'
 
     runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
+
+    if [ ! -z "\$(ps aux | grep php-fpm | grep -v grep)" ]; then
+      service php7.4-fpm restart >/dev/null 2>&1
+      service php7.3-fpm restart >/dev/null 2>&1
+      service php7.2-fpm restart >/dev/null 2>&1
+      service php7.1-fpm restart >/dev/null 2>&1
+      service php7.0-fpm restart >/dev/null 2>&1
+      service php5.6-fpm restart >/dev/null 2>&1
+      service php5-fpm restart >/dev/null 2>&1
+    fi
   fi
 }
 step_node() {
   # yarn with node and npm
   if [ "$NO_NODE" != "true" ]; then
     install yarn nodejs
+    yarn global add gulp pm2
   fi
 }
 step_mysql() {
@@ -362,6 +435,19 @@ step_mysql() {
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
     install mariadb-server-10.4
+    echo "default_password_lifetime = 0" >>/etc/mysql/mariadb.conf.d/mariadb.cnf
+    (
+      echo ''
+      echo "[mysqld]"
+      echo "default_authentication_plugin=mysql_native_password"
+    ) >>/etc/mysql/my.cnf
+    sed -i '/^bind-address/s/bind-address.*=.*/bind-address = */' /etc/mysql/my.cnf
+
+    local -r RAM=$(awk '/^MemTotal:/{printf "%3.0f", $2 / (1024 * 1024)}' /proc/meminfo)
+    local -r MAX_CONNECTIONS=$((70 * $RAM))
+    local -r REAL_MAX_CONNECTIONS=$((MAX_CONNECTIONS > 70 ? MAX_CONNECTIONS : 100))
+    sed -i "s/^max_connections.*=.*/max_connections=${REAL_MAX_CONNECTIONS}/" /etc/mysql/my.cnf
+
     expect -c "
         set timeout 3
         spawn mysql_secure_installation
@@ -387,11 +473,15 @@ step_mysql() {
 
     local -r MY_USER_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
-      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
+      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '${user}'@'%' IDENTIFIED BY '${my_pass_user}';"
     else
-      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
+      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '${user}'@'%' IDENTIFIED BY '${my_pass_user}';"
     fi
+    mysql -uroot -p"$my_pass_root" <<<"GRANT ALL PRIVILEGES ON *.* TO root@'%' WITH GRANT OPTION;"
+    mysql -uroot -p"$my_pass_root" <<<"GRANT ALL PRIVILEGES ON *.* TO ${user}@'%' WITH GRANT OPTION;"
     mysql -uroot -p"$my_pass_root" <<<"FLUSH PRIVILEGES;"
+
+    mysql -uroot -p"$my_pass_root" <<<"CREATE DATABASE IF NOT EXISTS ${user} CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 
     add_to_report "MariaDB,$RED${BOLD}${user}$RESET,$RED$BOLD${my_pass_user}$RESET"
   fi
@@ -467,13 +557,6 @@ step_final() {
 
   apt purge -y expect
   apt autoremove -y
-
-  mkdir -p /home/laravel/.ssh/
-  ssh-keygen -f /home/"$user"/.ssh/id_rsa -t rsa -N ''
-
-  ssh-keyscan -H github.com >>/home/"$user"/.ssh/known_hosts
-  ssh-keyscan -H bitbucket.org >>/home/"$user"/.ssh/known_hosts
-  ssh-keyscan -H gitlab.com >>/home/"$user"/.ssh/known_hosts
 
   # Auto upgrade security
   cat >>/etc/apt/apt.conf.d/50unattended-upgrades <<EOF
@@ -606,6 +689,14 @@ parse_arguments() {
       KEY_ONLY="${1#*=}"
       shift 1
       ;;
+    --name=*) # set the your name (default: DevOps)
+      name="${1#*=}"
+      shift 1
+      ;;
+    --email=*) # set the your email (instead many faces)
+      email="${1#*=}"
+      shift 1
+      ;;
     --user=*) # set the username (instead default)
       user="${1#*=}"
       shift 1
@@ -638,7 +729,7 @@ parse_arguments() {
       redis_pass="${1#*=}"
       shift 1
       ;;
-    --key-only | --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
+    --key-only | --name | --email | --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
 
     -*)
       error "unknown option: $1" >&2
@@ -661,9 +752,6 @@ main() {
 
   info "Initial actions...."
   step_initial
-
-  info "SSH things"
-  step_ssh
 
   info "Creating user"
   step_user_creation

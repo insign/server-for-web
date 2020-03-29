@@ -8,7 +8,7 @@ One-time fully automated shell script to install all needed software to run Lara
 Beyond the description, some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
-- Installs some tools: `ncdu`, `awscli`, `whois`, `httpie`
+- Installs some tools: `ncdu`, `awscli`, `whois`, [`httpie`](https://httpie.org/), [mc](http://linuxcommand.org/lc3_adv_mc.php)
 - Installs [micro](https://micro-editor.github.io/) editor with clipboard support
 - Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/) framework
 - Creates swap file to avoid lack of memory
@@ -67,6 +67,8 @@ bash install.sh
 ## Parameters (all optional)
 * `-u|--user` - set new user name. Default: laravel
 * `-p|--pass` - set new user password. Default is _random_ (shown at the end)
+* `--name` - set your name. Default is _DevOps_
+* `--email` - set your e-mail. Default is _none@none_
 * `--dont-create-new-user` - don't creates a new user (not recommended)
 * `--keep-existing-user` - keep existent user if it exists
 * `--skip-swap` - skip creation swapfile (not recommended unless already exists)
@@ -90,6 +92,7 @@ bash install.sh
 * `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
 * `--no-memcached` - don't install or configure memcached
 * `--no-beanstalkd` - don't install or configure beanstalkd
+* `--key-only=` - put here (with quotes) your personal ssh pubkey if you want to disable login using password. _**WARNING**: Be sure to know what you are doing._
 
 ## Examples
 ### Web Server
