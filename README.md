@@ -5,7 +5,7 @@ One-time fully automated shell script to install all needed software to run Lara
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
 </p>
 
-Beyond the description, some things that this script does (by default):
+Beyond the description, here some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
 - Installs some tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php)
@@ -98,21 +98,21 @@ bash install.sh
 ### Web Server
 #### with nginx & php
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis --no-memcached --no-beanstalkd
 ```
 ### Database Server
-> We don't auto allow any port to remote connection. You should prefer private networking.
+> UFW are not configured to allow remote ports to db or cache. You should prefer private networking.
 #### with mysql
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-certbot
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
 #### with postgresql
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-certbot
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
 ### Cache Server / Queue Server
 ```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-postgres --no-certbot
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-postgres --no-certbot
 ```
 
 

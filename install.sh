@@ -242,7 +242,7 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop
 
   git config --global user.name "$name"
   git config --global user.email "$email"
@@ -273,23 +273,23 @@ step_user_creation() {
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
+    eval user_dir="~$user"
+    mkdir -p "$user_dir/.ssh/"
 
-    mkdir -p "~$user/.ssh/"
-
-    chown -R "$user:$user" "~$user"
-    chmod -R 755 "~$user"
+    chown -R "$user:$user" "$user_dir"
+    eval chmod -R 755 "$user_dir"
 
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
-    chmod 700 "~$user/.ssh/id_rsa"
+    eval chmod 700 "$user_dir/.ssh/id_rsa"
 
     (
       ssh-keyscan -H github.com
       ssh-keyscan -H bitbucket.org
       ssh-keyscan -H gitlab.com
-    ) >>"~$user/.ssh/known_hosts"
+    ) >>"$user_dir/.ssh/known_hosts"
 
     if [ "$KEY_ONLY" != "false" ]; then
-      cp ~root/.ssh/authorized_keys "~$user/.ssh/authorized_keys"
+      cp ~root/.ssh/authorized_keys "$user_dir/.ssh/authorized_keys"
     fi
   fi
 }
