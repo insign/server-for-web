@@ -255,7 +255,12 @@ step_initial() {
 
 step_user_creation() {
   if [ "$KEY_ONLY" != "false" ]; then
-    echo -e "# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
+    sed -i "/PasswordAuthentication yes/d" /etc/ssh/sshd_config
+    echo "" | sudo tee -a /etc/ssh/sshd_config
+    echo "" | sudo tee -a /etc/ssh/sshd_config
+    echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
+
+    echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
   fi
 
   add_to_report "System,root,(untouched)"
@@ -273,14 +278,14 @@ step_user_creation() {
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
-    eval user_dir="~$user"
+    eval local -r user_dir="~$user"
     mkdir -p "$user_dir/.ssh/"
 
     chown -R "$user:$user" "$user_dir"
-    eval chmod -R 755 "$user_dir"
+    chmod -R 755 "$user_dir"
 
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
-    eval chmod 700 "$user_dir/.ssh/id_rsa"
+    chmod 700 "$user_dir/.ssh/id_rsa"
 
     (
       ssh-keyscan -H github.com
