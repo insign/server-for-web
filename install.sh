@@ -427,7 +427,7 @@ step_mysql() {
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
     install mariadb-server-10.4
-    echo "default_password_lifetime = 0" >>/etc/mysql/mariadb.conf.d/mariadb.cnf
+    echo -e "[mariadb]\ndefault_password_lifetime = 0" >>/etc/mysql/mariadb.conf.d/mariadb.cnf
     (
       echo ''
       echo "[mysqld]"
