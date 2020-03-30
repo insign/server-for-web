@@ -97,7 +97,7 @@ bash install.sh
 
 ## Examples
 #### Directly from you computer
-##### Importing you SSH pubkey
+##### Importing your SSH pubkey
 ```shell script
 ssh root@YOUR.SERVER.IP.HERE "bash -c \"\$(curl -fsSL https://git.io/Jv9a6)\" \"\" --reboot --key-only=\"$(cat ~/.ssh/id_rsa.pub)\""
 ```
