@@ -278,6 +278,9 @@ step_user_creation() {
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
+
+    add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
+    
     eval local -r user_dir="~$user"
     mkdir -p "$user_dir/.ssh/"
 
