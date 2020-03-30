@@ -65,10 +65,10 @@ bash install.sh
 ```
 
 ## Parameters (all optional)
-* `-u|--user` - set new user name. Default: laravel
-* `-p|--pass` - set new user password. Default is _random_ (shown at the end)
-* `--name` - set your name. Default is _DevOps_
-* `--email` - set your e-mail. Default is _none@none_
+* `-u|--user=` - set new user name. Default: laravel
+* `-p|--pass=` - set new user password. Default is _random_ (shown at the end)
+* `--name=` - set your name. Default is _DevOps_
+* `--email=` - set your e-mail. Default is _none@none_
 * `--dont-create-new-user` - don't creates a new user (not recommended)
 * `--keep-existing-user` - keep existent user if it exists
 * `--skip-swap` - skip creation swapfile (not recommended unless already exists)
@@ -81,37 +81,44 @@ bash install.sh
 * `--no-php` - don't install or configure php
 * `--no-node` - don't install or configure yarn/node/npm
 * `--no-mysql` - don't install or configure mysql (MariaDB actually)
-* `--my-pass-root` - set the mysql root password. Default is _random_ (shown at the end)
-* `--my-pass-user` - set the mysql user password. Default is _random_ (shown at the end)
+* `--my-pass-root=` - set the mysql root password. Default is _random_ (shown at the end)
+* `--my-pass-user=` - set the mysql user password. Default is _random_ (shown at the end)
 * `--no-postgres` - don't install or configure postgresql
-* `--pg-pass` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
-* `--pg-pass-root` - set the pg postgres user password. Default is _random_ (shown at the end)
-* `--pg-pass-user` - set the pg user password. Default is _random_ (shown at the end)
+* `--pg-pass=` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
+* `--pg-pass-root=` - set the pg postgres user password. Default is _random_ (shown at the end)
+* `--pg-pass-user=` - set the pg user password. Default is _random_ (shown at the end)
 * `--no-certbot` - don't install or configure certbot (let's encrypt)
 * `--no-redis` - don't install or configure redis-server
 * `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
 * `--no-memcached` - don't install or configure memcached
 * `--no-beanstalkd` - don't install or configure beanstalkd
 * `--key-only=` - put here (with quotes) your personal ssh pubkey if you want to disable login using password. _**WARNING**: Be sure to know what you are doing._
+* `--reboot` - reboot the system at the end of the script executation. Normally should **_not_** be used.
 
 ## Examples
+#### Directly from you computer
+##### Importing you SSH pubkey
+```shell script
+ssh root@YOUR.SERVER.IP.HERE "bash -c \"\$(curl -fsSL https://git.io/Jv9a6)\" \"\" --reboot --key-only=\"$(cat ~/.ssh/id_rsa.pub)\""
+```
+
 ### Web Server
 #### with nginx & php
-```shell
+```shell script
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis --no-memcached --no-beanstalkd
 ```
 ### Database Server
 > UFW are not configured to allow remote ports to db or cache. You should prefer private networking.
 #### with mysql
-```shell
+```shell script
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
 #### with postgresql
-```shell
+```shell script
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
 ### Cache Server / Queue Server
-```shell
+```shell script
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-postgres --no-certbot
 ```
 
@@ -134,7 +141,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Send report via e-mail
   - [ ] Hide report at the end
   - [ ] Run quiet installation with minimum verbosity
-  - [ ] Reboot after done
+  - [X] Reboot after done
 - [ ] Count time passed during installation
 - [ ] Add CI for this script.
 

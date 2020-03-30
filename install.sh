@@ -254,6 +254,8 @@ step_initial() {
 }
 
 step_user_creation() {
+  export user_home="~$user"
+
   if [ "$KEY_ONLY" != "false" ]; then
     sed -i "/PasswordAuthentication yes/d" /etc/ssh/sshd_config
     echo "" | sudo tee -a /etc/ssh/sshd_config
@@ -261,6 +263,7 @@ step_user_creation() {
     echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
 
     echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
+    echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>"$user_home/.ssh/authorized_keys"
   fi
 
   add_to_report "System,root,(untouched)"
@@ -280,24 +283,23 @@ step_user_creation() {
     success User created: "$BLUE""$BOLD""$user"
 
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
-    
-    eval local -r user_dir="~$user"
-    mkdir -p "$user_dir/.ssh/"
 
-    chown -R "$user:$user" "$user_dir"
-    chmod -R 755 "$user_dir"
+    mkdir -p "$user_home/.ssh/"
+
+    chown -R "$user:$user" "$user_home"
+    chmod -R 755 "$user_home"
 
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
-    chmod 700 "$user_dir/.ssh/id_rsa"
+    chmod 700 "$user_home/.ssh/id_rsa"
 
     (
       ssh-keyscan -H github.com
       ssh-keyscan -H bitbucket.org
       ssh-keyscan -H gitlab.com
-    ) >>"$user_dir/.ssh/known_hosts"
+    ) >>"$user_home/.ssh/known_hosts"
 
     if [ "$KEY_ONLY" != "false" ]; then
-      cp ~root/.ssh/authorized_keys "$user_dir/.ssh/authorized_keys"
+      cp ~root/.ssh/authorized_keys "$user_home/.ssh/authorized_keys"
     fi
   fi
 }
@@ -594,7 +596,12 @@ EOF
 
   show_report
 
+  if [[ "$REBOOT_ITE" == "true" ]]; then
+    reboot --force
+  fi
+
   su -l "$user"
+
 }
 
 setup_color() {
@@ -618,6 +625,10 @@ parse_arguments() {
     -p)
       pass="$2"
       shift 2
+      ;;
+    --reboot) # reboot in the end. (not recommended)
+      REBOOT_ITE="true"
+      shift 1
       ;;
     --dont-create-new-user) # don't creates a new user (Unlike default behavior)
       CREATE_NEW_USER="false"
