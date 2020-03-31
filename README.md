@@ -5,13 +5,36 @@ One-time fully automated shell script to install all needed software to run Lara
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
 </p>
 
->To understand what is installed, check [Parameters](#parameters-all-optional) section
+Beyond the description, here some things that this script does (by default):
+- Enables ubuntu auto-upgrade security releases
+- Uses apt-fast to speed-up instalation
+- Installs some tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php)
+- Installs [micro](https://micro-editor.github.io/) editor with clipboard support
+- Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/), [pure](https://github.com/sindresorhus/pure), [neofetch](https://github.com/dylanaraps/neofetch)
+- Creates swap file to avoid lack of memory
+- Auto-generates secure and easy-to-copy passwords
+- Installs fail2ban
+- Installs and enable ufw
+- Enable better gzip on nginx
+- Configure private network
+- Installs php7.4 (and others versions), many extensions with composer (and [prestissimo](https://github.com/hirak/prestissimo))
+- Secure install MariaDB (mysql) and PostgreSQL
+- Installs supervisor daemon
+- [Certbot](https://certbot.eff.org/) (let's encrypt) with CloudFlare plugin (others available to install)
+- Installs [mosh](https://mosh.org/) as great alternative to ssh
+- Generates server ssh key
+- Import keys from popular git services (github, bitbucket, gitlab)
+
+ 
+
+>To better choose what to install, check [Parameters](#parameters-all-optional) section
 
 ### Requisites
 - **Ubuntu 18.04 LTS**
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
 - a **_new server_**. We are not responsible for any loss you may suffer.
+  -  My referral links: [Vultr](https://www.vultr.com/?ref=7205888) - [DigitalOcean](https://m.do.co/c/4361152a43e1)
 
 > Without a new server, the script possible will ask things to replace files. Never recommended.
 
@@ -43,54 +66,63 @@ bash install.sh
 ```
 
 ## Parameters (all optional)
-* `-u|--user` - set new user name. Default: laravel
-* `-p|--pass` - set new user password. Default is _random_ (shown at the end)
+* `-u|--user=` - set new user name. Default: laravel
+* `-p|--pass=` - set new user password. Default is _random_ (shown at the end)
+* `--name=` - set your name. Default is _DevOps_
+* `--email=` - set your e-mail. Default is _none@none_
 * `--dont-create-new-user` - don't creates a new user (not recommended)
 * `--keep-existing-user` - keep existent user if it exists
 * `--skip-swap` - skip creation swapfile (not recommended unless already exists)
 * `--swap-size` - set swap file size in MB. Default is 2048 (2GB)
 * `--skip-updates` - Skip updates and upgrade the system (not recommended)
 * `--no-omz` - don't install [oh-my-zsh](https://ohmyz.sh/) framework (not recommended)
-* `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative) (not recommended)
+* `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
 * `--no-nginx` - don't install or configure nginx
 * `--no-php` - don't install or configure php
 * `--no-node` - don't install or configure yarn/node/npm
 * `--no-mysql` - don't install or configure mysql (MariaDB actually)
-* `--my-pass-root` - set the mysql root password. Default is _random_ (shown at the end)
-* `--my-pass-user` - set the mysql user password. Default is _random_ (shown at the end)
+* `--my-pass-root=` - set the mysql root password. Default is _random_ (shown at the end)
+* `--my-pass-user=` - set the mysql user password. Default is _random_ (shown at the end)
 * `--no-postgres` - don't install or configure postgresql
-* `--pg-pass` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
-* `--pg-pass-root` - set the pg postgres user password. Default is _random_ (shown at the end)
-* `--pg-pass-user` - set the pg user password. Default is _random_ (shown at the end)
+* `--pg-pass=` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
+* `--pg-pass-root=` - set the pg postgres user password. Default is _random_ (shown at the end)
+* `--pg-pass-user=` - set the pg user password. Default is _random_ (shown at the end)
+* `--no-supervisor` - don't install or configure supervisor daemon
 * `--no-certbot` - don't install or configure certbot (let's encrypt)
 * `--no-redis` - don't install or configure redis-server
 * `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
 * `--no-memcached` - don't install or configure memcached
 * `--no-beanstalkd` - don't install or configure beanstalkd
+* `--key-only=` - put here (with quotes) your personal ssh pubkey if you want to disable login using password. _**WARNING**: Be sure to know what you are doing._
+* `--reboot` - reboot the system at the end of the script executation. Normally should **_not_** be used.
 
 ## Examples
+#### Directly from you computer
+##### Importing your SSH pubkey
+```shell script
+ssh root@YOUR.SERVER.IP.HERE "bash -c \"\$(curl -fsSL https://git.io/Jv9a6)\" \"\" --reboot --key-only=\"$(cat ~/.ssh/id_rsa.pub)\""
+```
+> In the above case, it is safe to use `--reboot` parameter.
 ### Web Server
 #### with nginx & php
-```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis
+```shell script
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-postgres --no-redis --no-memcached --no-beanstalkd
 ```
 ### Database Server
-> We don't auto allow any port to remote connection. You should prefer private networking.
+> UFW are not configured to allow remote ports to db or cache. You should prefer private networking.
 #### with mysql
-```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-certbot
+```shell script
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-nginx --no-php --no-postgres --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
 #### with postgresql
-```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-certbot
+```shell script
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-certbot --no-redis --no-memcached --no-beanstalkd
 ```
-### Cache Server
-```shell
-bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-postgres --no-certbot
+### Cache Server / Queue Server
+```shell script
+bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-postgres --no-certbot
 ```
-### Queue Server
->soon
 
 ### SSH connection
 
@@ -134,20 +166,17 @@ ssh -i ~/.ssh/username user@IP
 - [X] Finish Memcached installation
 - [X] Finish Beanstalkd installation
 - [X] Finish fail2ban installation
-- [ ] Use fail2ban to protect nginx
 - [X] Enable better gzip config for nginx by default
-- [ ] Generate ssh key
-- [ ] Import private key
-- [ ] Remove password login (ssh key only)
-- [ ] Support for multiple [php versions](https://github.com/phpbrew/phpbrew)
+- [X] Import popular git services ssh keys
+- [X] Generate ssh key
+- [X] Import pubkey
+- [X] Remove password login (ssh key only)
+- [X] Support for multiple php versions
 - [X] Install mosh as alternative of ssh
-- [ ] One-parameter group for every possible (web,cache,db,queue)
-- [ ] Command to add sites, create db user and db, add ssl
-- [ ] Configure nginx as loadbalancer
 - [ ] Send report via e-mail
   - [ ] Hide report at the end
   - [ ] Run quiet installation with minimum verbosity
-  - [ ] Reboot after done
+  - [X] Reboot after done
 - [ ] Count time passed during installation
 - [ ] Add CI for this script.
 

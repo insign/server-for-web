@@ -14,6 +14,11 @@ set -e
 # Other options
 call_vars() {
   swapsize=${swapsize:-2048}
+  KEY_ONLY=${KEY_ONLY:-false}
+
+  name=${name:-DevOps}
+  email=${user:-"no-one-@got"}
+
   user=${user:-laravel}
   pass=${pass:=$(random_string)}
   pg_pass=${pg_pass:=$(random_string)}
@@ -36,10 +41,6 @@ add_to_report() {
 show_report() {
   printTable ',' "$REPORT" 'true'
 
-  show_public_key
-
-  show_private_key
-
   warning "Lose this data then go cry to you mom."
 }
 
@@ -52,7 +53,7 @@ command_exists() {
 }
 
 install() {
-  LC_ALL=C.UTF-8 apt install -y "$@"
+  LC_ALL=C.UTF-8 apt-fast install -y "$@"
 }
 
 error() {
@@ -177,14 +178,13 @@ others_checks() {
   root_required
 
   if [[ $(lsb_release -rs) != "18.04" ]]; then
-    warning "This script was tested only on Ubuntu 18.04 LTS, but let's go ahead..."
+    error "This script was tested only on Ubuntu 18.04 LTS"
   fi
 }
 
 step_initial() {
   export DEBIAN_FRONTEND=noninteractive
-
-  apt update
+  ln -sf /usr/share/zoneinfo/UTC /etc/localtime
 
   if [ "$SKIP_SWAP" != "true" ]; then
     info "Creating swapfile of $swapsize mb..."
@@ -202,9 +202,11 @@ step_initial() {
   if [ "$SKIP_UPDATES" != "true" ]; then
     info Updates and Upgrades...
 
-    install locales language-pack-en-base software-properties-common build-essential
+    apt install -y locales language-pack-en-base software-properties-common build-essential
     export LC_ALL=en_US.UTF-8
     export LANG=en_US.UTF-8
+
+    add-apt-repository -yn ppa:apt-fast/stable
 
     # postgresql
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
@@ -234,12 +236,21 @@ step_initial() {
   fi
 
   info Installing zsh and other basics...
-  install zsh curl wget zip unzip expect fail2ban xclip
+
+  apt -y install apt-fast
+  echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
+  echo debconf apt-fast/dlflag boolean true | debconf-set-selections
+  echo debconf apt-fast/aptmanager string apt | debconf-set-selections
+
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch
+
+  git config --global user.name "$name"
+  git config --global user.email "$email"
 
   curl https://getmic.ro | bash
   mv ./micro /usr/bin/micro
 
-  add_to_report "TYPE,USER,PASSWORD"
+  add_to_report 'TYPE,USER,PASSWORD'
 }
 
 step_user_creation() {
@@ -247,8 +258,8 @@ step_user_creation() {
   if [ "$CREATE_NEW_USER" != "false" ]; then
     if [ $(getent passwd "$user") ]; then
       if [ "$KEEP_EXISTING_USER" != "true" ]; then
-        info Deleting current user: "$GREEN""$BOLD""$user""$RESET"
-        userdel -r $user
+        info Deleting current user: "$GREEN$BOLD$user$RESET"
+        userdel -r "$user"
         success Deleted.
       else
         error user already exists, remove --keep-existing-user or choose another: "$GREEN""$BOLD""$user""$RESET"
@@ -257,51 +268,38 @@ step_user_creation() {
 
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
-    
-    mkdir -p /home/$user/.ssh
-
-    ssh-keygen -f /home/$user/.ssh/id_rsa -t rsa -N ''
-
-    ssh-keyscan -H github.com >> /home/$user/.ssh/known_hosts
-    ssh-keyscan -H bitbucket.org >> /home/$user/.ssh/known_hosts
-    ssh-keyscan -H gitlab.com >> /home/$user/.ssh/known_hosts
-
-    touch /home/$user/.ssh/authorized_keys
-    cat /home/$user/.ssh/id_rsa.pub > /home/$user/.ssh/authorized_keys
-
-    chown -R $user:$user /home/$user
-    chmod -R 755 /home/$user
-    chmod 700 /home/$user/.ssh/id_rsa
-
-    # Disable Password Authentication Over SSH
-
-    sed -i "/PasswordAuthentication yes/d" /etc/ssh/sshd_config
-    echo "" | sudo tee -a /etc/ssh/sshd_config
-    echo "" | sudo tee -a /etc/ssh/sshd_config
-    echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
-
-    # Restart SSH
-
-    ssh-keygen -A
-    service ssh restart
-
     success User created: "$BLUE""$BOLD""$user"
-
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
 
+    eval local -r user_home="~$user"
+    mkdir -p "$user_home/.ssh/" -m 755
+
+    chown -R "$user:$user" "$user_home"
+
+    runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
+
+    if [ "$KEY_ONLY" != "false" ]; then
+      sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
+      sed -i "/PubkeyAuthentication.+/d" /etc/ssh/sshd_config
+      echo "" | sudo tee -a /etc/ssh/sshd_config
+      echo "" | sudo tee -a /etc/ssh/sshd_config
+      echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
+      echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
+
+      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" | tee -a ~root/.ssh/authorized_keys "$user_home/.ssh/authorized_keys" >/dev/null
+    fi
+
+    (
+      ssh-keyscan -H github.com
+      ssh-keyscan -H bitbucket.org
+      ssh-keyscan -H gitlab.com
+    ) >>"$user_home/.ssh/known_hosts"
+
+    chown -R "$user:$user" "$user_home"
+    chmod -R 755 "$user_home"
+    chmod 700 "$user_home/.ssh/id_rsa"
+
   fi
-}
-
-show_public_key() {
-  success Public Key
-
-  cat /home/$user/.ssh/id_rsa.pub
-}
-
-show_private_key() {
-  success Private Key
-
-  cat /home/$user/.ssh/id_rsa
 }
 
 step_ufw() {
@@ -328,7 +326,6 @@ step_ufw() {
 step_nginx() {
   if [ "$NO_NGINX" != "true" ]; then
     install nginx
-    sed -i 's/# server_names_hash_bucket_size/server_names_hash_bucket_size/' /etc/nginx/nginx.conf
 
     if command_exists ufw; then
       ufw allow 'Nginx Full'
@@ -357,30 +354,78 @@ text/plain
 text/x-component;
 EOF
 
+    sed -i "s/user www-data;/user $user;/" /etc/nginx/nginx.conf
+    # sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf # already default
+    sed -i "s/# multi_accept.*/multi_accept on;/" /etc/nginx/nginx.conf
+    sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 128;/" /etc/nginx/nginx.conf
+
+    openssl dhparam -out /etc/nginx/dhparams.pem 2048
+
+    rm /etc/nginx/sites-{available,enabled}/default
+
+    cat >/etc/nginx/sites-available/catch-all <<EOF
+server {
+    return 404;
+}
+EOF
+
+    ln -s /etc/nginx/sites-{available,enabled}/catch-all
+
+    usermod -aG www-data "$user"
+
     service nginx restart
   fi
 }
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
-    install php-{common,json,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,fpm,imagick,sqlite3,tidy,xmlrpc,intl,imap,pgsql,tokenizer,redis,memcached}
+    echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
+    (
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.3-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.1-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.0-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php5.6-fpm reload"
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
+    ) >>/etc/sudoers.d/php-fpm
+
+    install php-{common,cli,fpm,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
     install php
 
-    runuser -l $user -c $'php -r "copy(\'https://getcomposer.org/installer\', \'composer-setup.php\');"'
-    runuser -l $user -c $'php composer-setup.php'
-    runuser -l $user -c $'php -r "unlink(\'composer-setup.php\');"'
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/cli/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/cli/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/cli/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/cli/php.ini
 
-    local -r user_homedir=$(runuser -l $user -c $'pwd')
-    mv $user_homedir/composer.phar /usr/local/bin/composer
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/fpm/php.ini
+
+    sed -i "s/^user = www-data/user = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/^group = www-data/group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.owner.*/listen.owner = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.group.*/listen.group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/;request_terminate_timeout.*/request_terminate_timeout = 60/" /etc/php/7.4/fpm/pool.d/www.conf
+
+    chmod 733 /var/lib/php/sessions
+    chmod +t /var/lib/php/sessions
+
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
 
     runuser -l $user -c $'composer global require hirak/prestissimo'
 
-    runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
+    service php7.4-fpm restart
   fi
 }
 step_node() {
   # yarn with node and npm
   if [ "$NO_NODE" != "true" ]; then
     install yarn nodejs
+    yarn global add gulp pm2 pure-prompt
   fi
 }
 step_mysql() {
@@ -388,6 +433,19 @@ step_mysql() {
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
     install mariadb-server-10.4
+    echo -e "[mariadb]\ndefault_password_lifetime = 0" >>/etc/mysql/mariadb.conf.d/mariadb.cnf
+    (
+      echo ''
+      echo "[mysqld]"
+      echo "default_authentication_plugin=mysql_native_password"
+    ) >>/etc/mysql/my.cnf
+    sed -i '/^bind-address/s/bind-address.*=.*/bind-address = */' /etc/mysql/my.cnf
+
+    local -r RAM=$(awk '/^MemTotal:/{printf "%3.0f", $2 / (1024 * 1024)}' /proc/meminfo)
+    local -r MAX_CONNECTIONS=$((70 * $RAM))
+    local -r REAL_MAX_CONNECTIONS=$((MAX_CONNECTIONS > 70 ? MAX_CONNECTIONS : 100))
+    sed -i "s/^max_connections.*=.*/max_connections=${REAL_MAX_CONNECTIONS}/" /etc/mysql/my.cnf
+
     expect -c "
         set timeout 3
         spawn mysql_secure_installation
@@ -411,13 +469,19 @@ step_mysql() {
 
     add_to_report "MariaDB,$RED${BOLD}root$RESET,$RED$BOLD$my_pass_root$RESET"
 
+    mysql -uroot -p"$my_pass_root" <<<"CREATE USER 'root'@'%' IDENTIFIED BY '$my_pass_root';" >/dev/null 2>&1
+
     local -r MY_USER_EXISTS="$(mysql -uroot -p"$my_pass_root" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$user')")"
     if [ "$MY_USER_EXISTS" = 1 ]; then
-      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
+      mysql -uroot -p"$my_pass_root" <<<"ALTER USER '${user}'@'%' IDENTIFIED BY '${my_pass_user}';"
     else
-      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '$user'@'localhost' IDENTIFIED BY '${my_pass_user}';"
+      mysql -uroot -p"$my_pass_root" <<<"CREATE USER '${user}'@'%' IDENTIFIED BY '${my_pass_user}';"
     fi
+    mysql -uroot -p"$my_pass_root" <<<"GRANT ALL PRIVILEGES ON *.* TO root@'%' WITH GRANT OPTION;"
+    mysql -uroot -p"$my_pass_root" <<<"GRANT ALL PRIVILEGES ON *.* TO ${user}@'%' WITH GRANT OPTION;"
     mysql -uroot -p"$my_pass_root" <<<"FLUSH PRIVILEGES;"
+
+    mysql -uroot -p"$my_pass_root" <<<"CREATE DATABASE IF NOT EXISTS ${user} CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 
     add_to_report "MariaDB,$RED${BOLD}${user}$RESET,$RED$BOLD${my_pass_user}$RESET"
   fi
@@ -484,6 +548,17 @@ step_final() {
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   fi
 
+  if command_exists yarn; then
+    yarn global add pure-prompt
+    runuser -l $user -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
+    runuser -l $user -c "echo 'prompt pure' >> ~/.zshrc"
+  fi
+
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.yarn/bin"\' >> ~/.zshrc'
+  runuser -l $user -c "echo 'neofetch' >> ~/.zshrc"
+
   if [ "$NO_MOSH" != "true" ]; then
     install mosh
     if command_exists ufw; then
@@ -493,6 +568,23 @@ step_final() {
 
   apt purge -y expect
   apt autoremove -y
+
+  # Auto upgrade security
+  cat >>/etc/apt/apt.conf.d/50unattended-upgrades <<EOF
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:38";
+EOF
+
+  cat >/etc/apt/apt.conf.d/10periodic <<EOF
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
+
+  apt update && apt -y upgrade
 
   echo "$GREEN"
   # http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=DONE!
@@ -511,7 +603,12 @@ step_final() {
 
   show_report
 
+  if [[ "$REBOOT_ITE" == "true" ]]; then
+    reboot
+  fi
+
   su -l "$user"
+
 }
 
 setup_color() {
@@ -535,6 +632,10 @@ parse_arguments() {
     -p)
       pass="$2"
       shift 2
+      ;;
+    --reboot) # reboot in the end. (not recommended)
+      REBOOT_ITE="true"
+      shift 1
       ;;
     --dont-create-new-user) # don't creates a new user (Unlike default behavior)
       CREATE_NEW_USER="false"
@@ -588,6 +689,10 @@ parse_arguments() {
       NO_POSTGRES="true"
       shift 1
       ;;
+    --no-supervisor) # don't install or supervisor daemon (Unlike default behavior)
+      NO_SUPERVISOR="true"
+      shift 1
+      ;;
     --no-certbot) # don't install or configure certbot (let's encrypt) (Unlike default behavior)
       NO_CERTBOT="true"
       shift 1
@@ -602,6 +707,18 @@ parse_arguments() {
       ;;
     --no-beanstalkd) # don't install or configure beanstalkd (Unlike default behavior)
       NO_BEANSTALKD="true"
+      shift 1
+      ;;
+    --key-only=*) # set an authorized pub key to enter via ssh and blocks login via password (instead default)
+      KEY_ONLY="${1#*=}"
+      shift 1
+      ;;
+    --name=*) # set the your name (default: DevOps)
+      name="${1#*=}"
+      shift 1
+      ;;
+    --email=*) # set the your email (instead many faces)
+      email="${1#*=}"
       shift 1
       ;;
     --user=*) # set the username (instead default)
@@ -636,7 +753,7 @@ parse_arguments() {
       redis_pass="${1#*=}"
       shift 1
       ;;
-    --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
+    --key-only | --name | --email | --user | --pass | --pg-pass | --my-pass-root | --my-pass-user | --pg-pass-root | --pg-pass-user | --redis-pass) error "$1 requires an argument" ;;
 
     -*)
       error "unknown option: $1" >&2
@@ -651,6 +768,7 @@ parse_arguments() {
 }
 
 main() {
+
   setup_color
   call_vars
   others_checks
