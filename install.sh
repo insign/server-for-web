@@ -31,6 +31,8 @@ call_vars() {
 
   redis_pass=${redis_pass:=$(random_string)}
 
+  start_time=$(date +"%s")
+
   REPORT=''
 }
 
@@ -180,6 +182,26 @@ others_checks() {
   if [[ $(lsb_release -rs) != "18.04" ]]; then
     error "This script was tested only on Ubuntu 18.04 LTS"
   fi
+}
+
+getDuration() {
+  end_time=$(date +"%s")
+  local duration=$(($end_time-$start_time))
+  local shiff=$duration
+  local secs=$((shiff % 60));  shiff=$((shiff / 60));
+  local mins=$((shiff % 60));  shiff=$((shiff / 60));
+  local hours=$shiff
+  local splur; if [ $secs  -eq 1 ]; then splur=''; else splur='s'; fi
+  local mplur; if [ $mins  -eq 1 ]; then mplur=''; else mplur='s'; fi
+  local hplur; if [ $hours -eq 1 ]; then hplur=''; else hplur='s'; fi
+  if [[ $hours -gt 0 ]]; then
+    txt="$hours hour$hplur, $mins minute$mplur, $secs second$splur"
+  elif [[ $mins -gt 0 ]]; then
+    txt="$mins minute$mplur, $secs second$splur"
+  else
+    txt="$secs second$splur"
+  fi
+  echo "$txt"
 }
 
 step_initial() {
@@ -599,6 +621,9 @@ EOF
       ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚═╝
 
 	EOF
+
+  echo "      in $(getDuration)"
+
   echo "$RESET"
 
   show_report

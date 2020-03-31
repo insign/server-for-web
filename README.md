@@ -144,7 +144,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
   - [ ] Hide report at the end
   - [ ] Run quiet installation with minimum verbosity
   - [X] Reboot after done
-- [ ] Count time passed during installation
+- [X] Count time passed during installation
 - [ ] Add CI for this script.
 
 ## Contributing
