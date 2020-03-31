@@ -298,7 +298,7 @@ step_user_creation() {
       ssh-keyscan -H gitlab.com
     ) >>"$user_home/.ssh/known_hosts"
 
-      chmod 700 "$user_home/.ssh/id_rsa"
+    eval chmod 700 "$user_home/.ssh/id_rsa"
 
     if [ "$KEY_ONLY" != "false" ]; then
       cp ~root/.ssh/authorized_keys "$user_home/.ssh/authorized_keys"
