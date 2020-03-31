@@ -254,9 +254,6 @@ step_initial() {
 }
 
 step_user_creation() {
-  eval local -r user_home="~$user"
-  mkdir -p "$user_home/.ssh/"
-
   add_to_report "System,root,(untouched)"
   if [ "$CREATE_NEW_USER" != "false" ]; then
     if [ $(getent passwd "$user") ]; then
@@ -272,6 +269,9 @@ step_user_creation() {
     useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
+
+    eval local -r user_home="~$user"
+    mkdir -p "$user_home/.ssh/"
 
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
 
