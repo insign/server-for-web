@@ -38,7 +38,7 @@ Beyond the description, here some things that this script does (by default):
 
 > Without a new server, the script possible will ask things to replace files. Never recommended.
 
-### Basic Installation
+### Full Installation
 
 This script is installed by running one of the following commands in your terminal. You can install this via the command-line with either `curl` or `wget`.
 
