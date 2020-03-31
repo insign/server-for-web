@@ -126,6 +126,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 
 ## Roadmap
+- [ ] Add Apache Server as alternative to nginx
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
