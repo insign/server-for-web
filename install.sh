@@ -550,8 +550,8 @@ step_final() {
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   fi
 
-  if command_exists npm; then
-    yarn global add pure-prompt
+  if command_exists yarn || command_exists npm; then
+    yarn global add pure-prompt || npm install --global pure-prompt
     runuser -l $user -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
     runuser -l $user -c "echo 'prompt pure' >> ~/.zshrc"
   fi
