@@ -680,6 +680,10 @@ parse_arguments() {
       NO_POSTGRES="true"
       shift 1
       ;;
+    --no-supervisor) # don't install or supervisor daemon (Unlike default behavior)
+      NO_SUPERVISOR="true"
+      shift 1
+      ;;
     --no-certbot) # don't install or configure certbot (let's encrypt) (Unlike default behavior)
       NO_CERTBOT="true"
       shift 1

@@ -88,6 +88,7 @@ bash install.sh
 * `--pg-pass=` - set the system user 'postgres' password. Default is _random_ (shown at the end) 
 * `--pg-pass-root=` - set the pg postgres user password. Default is _random_ (shown at the end)
 * `--pg-pass-user=` - set the pg user password. Default is _random_ (shown at the end)
+* `--no-supervisor` - don't install or configure supervisor daemon
 * `--no-certbot` - don't install or configure certbot (let's encrypt)
 * `--no-redis` - don't install or configure redis-server
 * `--redis-pass` - set the redis master password. Default is _random_ (shown at the end)
