@@ -255,7 +255,8 @@ step_initial() {
 
 step_user_creation() {
   export user_home="~$user"
-
+  mkdir -p "$user_home/.ssh/"
+  
   if [ "$KEY_ONLY" != "false" ]; then
     sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
     sed -i "/PubkeyAuthentication.+/d" /etc/ssh/sshd_config
@@ -285,8 +286,6 @@ step_user_creation() {
     success User created: "$BLUE""$BOLD""$user"
 
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
-
-    mkdir -p "$user_home/.ssh/"
 
     chown -R "$user:$user" "$user_home"
     chmod -R 755 "$user_home"
