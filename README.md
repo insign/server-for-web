@@ -124,39 +124,6 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php --no-node --no-postgres --no-certbot
 ```
 
-### SSH connection
-
-Make a backup copy of the final report data.
-
-After that go to the .ssh directory on your local computer.
-
-```shell
-cd ~/.ssh
-```
-
-Create the username.pub file and add the contents of the public key.
-
-Now, create the file "username" and add the contents of the private key.
-
-At the end you should have two files:
-
-- username.pub
-- username
-
-Feel free to change "username" to the name you want.
-
-And then give the appropriate permissions to the files:
-
-```shell
-chmod 644 ~/.ssh/username.pub
-chmod 600 ~/.ssh/username
-```
-
-To make the SSH connection:
-
-```shell
-ssh -i ~/.ssh/username user@IP
-```
 
 ## Roadmap
 - [X] Finish postgresql installation
@@ -177,7 +144,7 @@ ssh -i ~/.ssh/username user@IP
   - [ ] Hide report at the end
   - [ ] Run quiet installation with minimum verbosity
   - [X] Reboot after done
-- [ ] Count time passed during installation
+- [X] Count time passed during installation
 - [ ] Add CI for this script.
 
 ## Contributing
