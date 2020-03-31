@@ -272,14 +272,11 @@ step_user_creation() {
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
 
     eval local -r user_home="~$user"
-    mkdir -p "$user_home/.ssh/"
+    mkdir -p "$user_home/.ssh/" -m 755
 
     chown -R "$user:$user" "$user_home"
-    chmod -R 755 "$user_home"
 
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
-
-    chmod 700 "$user_home/.ssh/id_rsa"
 
     if [ "$KEY_ONLY" != "false" ]; then
       sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
@@ -298,6 +295,11 @@ step_user_creation() {
       ssh-keyscan -H bitbucket.org
       ssh-keyscan -H gitlab.com
     ) >>"$user_home/.ssh/known_hosts"
+
+    chown -R "$user:$user" "$user_home"
+    chmod -R 755 "$user_home"
+    chmod 700 "$user_home/.ssh/id_rsa"
+
   fi
 }
 
