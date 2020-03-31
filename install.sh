@@ -418,8 +418,6 @@ step_php() {
 
     runuser -l $user -c $'composer global require hirak/prestissimo'
 
-    runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
-
     service php7.4-fpm restart
   fi
 }
@@ -550,12 +548,15 @@ step_final() {
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   fi
 
-  if command_exists yarn || command_exists npm; then
-    yarn global add pure-prompt || npm install --global pure-prompt
+  if command_exists yarn; then
+    yarn global add pure-prompt
     runuser -l $user -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
     runuser -l $user -c "echo 'prompt pure' >> ~/.zshrc"
   fi
 
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.yarn/bin"\' >> ~/.zshrc'
   runuser -l $user -c "echo 'neofetch' >> ~/.zshrc"
 
   if [ "$NO_MOSH" != "true" ]; then

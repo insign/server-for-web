@@ -76,7 +76,7 @@ bash install.sh
 * `--swap-size` - set swap file size in MB. Default is 2048 (2GB)
 * `--skip-updates` - Skip updates and upgrade the system (not recommended)
 * `--no-omz` - don't install [oh-my-zsh](https://ohmyz.sh/) framework (not recommended)
-* `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative) (not recommended)
+* `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
 * `--no-nginx` - don't install or configure nginx
 * `--no-php` - don't install or configure php
@@ -103,7 +103,7 @@ bash install.sh
 ```shell script
 ssh root@YOUR.SERVER.IP.HERE "bash -c \"\$(curl -fsSL https://git.io/Jv9a6)\" \"\" --reboot --key-only=\"$(cat ~/.ssh/id_rsa.pub)\""
 ```
-
+> In the above case, it is safe to use `--reboot` parameter.
 ### Web Server
 #### with nginx & php
 ```shell script
@@ -136,8 +136,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Enable better gzip config for nginx by default
 - [X] Import popular git services ssh keys
 - [X] Generate ssh key
-- [ ] Import private key
-- [ ] Remove password login (ssh key only)
+- [X] Import pubkey
+- [X] Remove password login (ssh key only)
 - [X] Support for multiple php versions
 - [X] Install mosh as alternative of ssh
 - [ ] Send report via e-mail
