@@ -599,7 +599,7 @@ EOF
   show_report
 
   if [[ "$REBOOT_ITE" == "true" ]]; then
-    reboot --force
+    reboot
   fi
 
   su -l "$user"
