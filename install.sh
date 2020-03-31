@@ -286,8 +286,7 @@ step_user_creation() {
       echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
       echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
 
-      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
-      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>"$user_home/.ssh/authorized_keys"
+      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" | tee -a ~root/.ssh/authorized_keys "$user_home/.ssh/authorized_keys" >/dev/null
     fi
 
     (
