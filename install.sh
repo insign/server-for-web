@@ -277,9 +277,9 @@ step_user_creation() {
     chown -R "$user:$user" "$user_home"
     chmod -R 755 "$user_home"
 
-    chmod 700 "$user_home/.ssh/id_rsa"
-
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
+
+    chmod 700 "$user_home/.ssh/id_rsa"
 
     if [ "$KEY_ONLY" != "false" ]; then
       sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
