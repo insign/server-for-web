@@ -254,7 +254,7 @@ step_initial() {
 }
 
 step_user_creation() {
-  export user_home="~$user"
+  eval local -r user_home="~$user"
   mkdir -p "$user_home/.ssh/"
 
   add_to_report "System,root,(untouched)"
