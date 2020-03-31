@@ -242,7 +242,7 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch
 
   git config --global user.name "$name"
   git config --global user.email "$email"
@@ -427,7 +427,7 @@ step_node() {
   # yarn with node and npm
   if [ "$NO_NODE" != "true" ]; then
     install yarn nodejs
-    yarn global add gulp pm2
+    yarn global add gulp pm2 pure-prompt
   fi
 }
 step_mysql() {
@@ -549,6 +549,14 @@ step_final() {
   if [ "$NO_OMZ" != "true" ]; then
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
   fi
+
+  if command_exists npm; then
+    yarn global add pure-prompt
+    runuser -l $user -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
+    runuser -l $user -c "echo 'prompt pure' >> ~/.zshrc"
+  fi
+
+  runuser -l $user -c "echo 'neofetch' >> ~/.zshrc"
 
   if [ "$NO_MOSH" != "true" ]; then
     install mosh

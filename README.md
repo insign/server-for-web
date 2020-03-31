@@ -10,7 +10,7 @@ Beyond the description, here some things that this script does (by default):
 - Uses apt-fast to speed-up instalation
 - Installs some tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php)
 - Installs [micro](https://micro-editor.github.io/) editor with clipboard support
-- Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/) framework
+- Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/), [pure](https://github.com/sindresorhus/pure), [neofetch](https://github.com/dylanaraps/neofetch)
 - Creates swap file to avoid lack of memory
 - Auto-generates secure and easy-to-copy passwords
 - Installs fail2ban
