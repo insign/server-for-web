@@ -257,18 +257,6 @@ step_user_creation() {
   export user_home="~$user"
   mkdir -p "$user_home/.ssh/"
 
-  if [ "$KEY_ONLY" != "false" ]; then
-    sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
-    sed -i "/PubkeyAuthentication.+/d" /etc/ssh/sshd_config
-    echo "" | sudo tee -a /etc/ssh/sshd_config
-    echo "" | sudo tee -a /etc/ssh/sshd_config
-    echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
-    echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
-
-    echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
-    echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>"$user_home/.ssh/authorized_keys"
-  fi
-
   add_to_report "System,root,(untouched)"
   if [ "$CREATE_NEW_USER" != "false" ]; then
     if [ $(getent passwd "$user") ]; then
@@ -287,10 +275,19 @@ step_user_creation() {
 
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
 
-    chown -R "$user:$user" "$user_home"
-    chmod -R 755 "$user_home"
-
     runuser -l "$user" -c "ssh-keygen -f ~$user/.ssh/id_rsa -t rsa -N ''"
+
+    if [ "$KEY_ONLY" != "false" ]; then
+      sed -i "/PasswordAuthentication.+/d" /etc/ssh/sshd_config
+      sed -i "/PubkeyAuthentication.+/d" /etc/ssh/sshd_config
+      echo "" | sudo tee -a /etc/ssh/sshd_config
+      echo "" | sudo tee -a /etc/ssh/sshd_config
+      echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
+      echo "PubkeyAuthentication yes" | sudo tee -a /etc/ssh/sshd_config
+
+      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>~root/.ssh/authorized_keys
+      echo -e "\n# User provided key\n${KEY_ONLY}\n\n" >>"$user_home/.ssh/authorized_keys"
+    fi
 
     (
       ssh-keyscan -H github.com
@@ -298,11 +295,10 @@ step_user_creation() {
       ssh-keyscan -H gitlab.com
     ) >>"$user_home/.ssh/known_hosts"
 
-    eval chmod 700 "$user_home/.ssh/id_rsa"
+    chown -R "$user:$user" "$user_home"
+    chmod -R 755 "$user_home"
 
-    if [ "$KEY_ONLY" != "false" ]; then
-      cp ~root/.ssh/authorized_keys "$user_home/.ssh/authorized_keys"
-    fi
+    eval chmod 700 "$user_home/.ssh/id_rsa"
   fi
 }
 
