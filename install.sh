@@ -755,8 +755,7 @@ parse_arguments() {
 }
 
 main() {
-  echo vok
-  exit 1
+
   setup_color
   call_vars
   others_checks
