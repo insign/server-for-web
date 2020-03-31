@@ -34,6 +34,7 @@ Beyond the description, here some things that this script does (by default):
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
 - a **_new server_**. We are not responsible for any loss you may suffer.
+  -  My referral links: [Vultr](https://www.vultr.com/?ref=7205888) - [DigitalOcean](https://m.do.co/c/4361152a43e1)
 
 > Without a new server, the script possible will ask things to replace files. Never recommended.
 
