@@ -8,20 +8,16 @@ One-time fully automated shell script to install all needed software to run Lara
 Beyond the description, here some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
-- Installs some tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php)
-- Installs [micro](https://micro-editor.github.io/) editor with clipboard support
+- CLI tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php), [`speedtest`](https://github.com/sivel/speedtest-cli), [`micro`](https://micro-editor.github.io/), [`mosh`](https://mosh.org/)
 - Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/), [pure](https://github.com/sindresorhus/pure), [neofetch](https://github.com/dylanaraps/neofetch)
 - Creates swap file to avoid lack of memory
 - Auto-generates secure and easy-to-copy passwords
-- Installs fail2ban
-- Installs and enable ufw
+- Installs and enable ufw, and fail2ban
 - Enable better gzip on nginx
-- Configure private network
 - Installs php7.4 (and others versions), many extensions with composer (and [prestissimo](https://github.com/hirak/prestissimo))
 - Secure install MariaDB (mysql) and PostgreSQL
 - Installs supervisor daemon
 - [Certbot](https://certbot.eff.org/) (let's encrypt) with CloudFlare plugin (others available to install)
-- Installs [mosh](https://mosh.org/) as great alternative to ssh
 - Generates server ssh key
 - Import keys from popular git services (github, bitbucket, gitlab)
 
@@ -127,6 +123,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 ## Roadmap
 - [ ] Add Apache Server as alternative to nginx
+- [ ] Configure private network
+- [ ] Allow only some IPs via as parameter
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
@@ -137,7 +135,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Enable better gzip config for nginx by default
 - [X] Import popular git services ssh keys
 - [X] Generate ssh key
-- [X] Import pubkey
+- [X] Import private key
 - [X] Remove password login (ssh key only)
 - [X] Support for multiple php versions
 - [X] Install mosh as alternative of ssh

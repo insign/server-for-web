@@ -186,14 +186,19 @@ others_checks() {
 
 getDuration() {
   end_time=$(date +"%s")
-  local duration=$(($end_time-$start_time))
+  local duration=$(($end_time - $start_time))
   local shiff=$duration
-  local secs=$((shiff % 60));  shiff=$((shiff / 60));
-  local mins=$((shiff % 60));  shiff=$((shiff / 60));
+  local secs=$((shiff % 60))
+  shiff=$((shiff / 60))
+  local mins=$((shiff % 60))
+  shiff=$((shiff / 60))
   local hours=$shiff
-  local splur; if [ $secs  -eq 1 ]; then splur=''; else splur='s'; fi
-  local mplur; if [ $mins  -eq 1 ]; then mplur=''; else mplur='s'; fi
-  local hplur; if [ $hours -eq 1 ]; then hplur=''; else hplur='s'; fi
+  local splur
+  if [ $secs -eq 1 ]; then splur=''; else splur='s'; fi
+  local mplur
+  if [ $mins -eq 1 ]; then mplur=''; else mplur='s'; fi
+  local hplur
+  if [ $hours -eq 1 ]; then hplur=''; else hplur='s'; fi
   if [[ $hours -gt 0 ]]; then
     txt="$hours hour$hplur, $mins minute$mplur, $secs second$splur"
   elif [[ $mins -gt 0 ]]; then
@@ -264,7 +269,8 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip
+  pip install speedtest-cli
 
   git config --global user.name "$name"
   git config --global user.email "$email"
@@ -398,6 +404,15 @@ EOF
     service nginx restart
   fi
 }
+if [ "$PREFER_APACHE" == "true" ]; then
+  install apache2
+
+  if command_exists ufw; then
+    ufw allow 'Nginx Full'
+  fi
+
+fi
+
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
     echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
@@ -810,6 +825,9 @@ main() {
 
   info "Installing nginx"
   step_nginx
+
+  info "Installing apache"
+  step_apache
 
   info "Installing php 7.4"
   step_php
