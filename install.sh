@@ -351,7 +351,7 @@ step_ufw() {
   fi
 }
 
-step_nginx() {
+step_webserver() {
   if [ "$PREFER_APACHE" == "true" ]; then
     install apache2
 
@@ -365,19 +365,6 @@ step_nginx() {
   else
     if [ "$NO_NGINX" != "true" ]; then
       install nginx
-      if [ "$NO_PHP" != "true" ]; then
-        install php-fpm
-        echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
-        (
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.3-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.1-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.0-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php5.6-fpm reload"
-          echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
-        ) >>/etc/sudoers.d/php-fpm
-      fi
 
       if command_exists ufw; then
         ufw allow 'Nginx Full'
@@ -444,7 +431,7 @@ step_php() {
       echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
     ) >>/etc/sudoers.d/php-fpm
 
-    install php-{common,cli,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
+    install php-{common,cli,fpm,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
     install php
 
     sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/cli/php.ini
@@ -846,11 +833,11 @@ main() {
   info "Installing UFW"
   step_ufw
 
+  info "Installing nginx (or Apache if you prefered)"
+  step_webserver
+
   info "Installing php 7.4"
   step_php
-
-  info "Installing nginx (or Apache if you prefered)"
-  step_nginx
 
   info "Installing node 12"
   step_node
