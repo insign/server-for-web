@@ -352,14 +352,38 @@ step_ufw() {
 }
 
 step_nginx() {
-  if [ "$NO_NGINX" != "true" ]; then
-    install nginx
+  if [ "$PREFER_APACHE" == "true" ]; then
+    install apache2
 
-    if command_exists ufw; then
-      ufw allow 'Nginx Full'
+    if [ "$NO_PHP" != "true" ]; then
+      install libapache2-mod-php
     fi
 
-    cat >/etc/nginx/conf.d/gzip.conf <<EOF
+    if command_exists ufw; then
+      ufw allow 'Apache Full'
+    fi
+  else
+    if [ "$NO_NGINX" != "true" ]; then
+      install nginx
+      if [ "$NO_PHP" != "true" ]; then
+        install php-fpm
+        echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
+        (
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.3-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.1-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php7.0-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php5.6-fpm reload"
+          echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
+        ) >>/etc/sudoers.d/php-fpm
+      fi
+
+      if command_exists ufw; then
+        ufw allow 'Nginx Full'
+      fi
+
+      cat >/etc/nginx/conf.d/gzip.conf <<EOF
 gzip_comp_level 6;
 gzip_min_length 256;
 gzip_proxied any;
@@ -382,36 +406,30 @@ text/plain
 text/x-component;
 EOF
 
-    sed -i "s/user www-data;/user $user;/" /etc/nginx/nginx.conf
-    # sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf # already default
-    sed -i "s/# multi_accept.*/multi_accept on;/" /etc/nginx/nginx.conf
-    sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 128;/" /etc/nginx/nginx.conf
+      sed -i "s/user www-data;/user $user;/" /etc/nginx/nginx.conf
+      # sed -i "s/worker_processes.*/worker_processes auto;/" /etc/nginx/nginx.conf # already default
+      sed -i "s/# multi_accept.*/multi_accept on;/" /etc/nginx/nginx.conf
+      sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 128;/" /etc/nginx/nginx.conf
 
-    openssl dhparam -out /etc/nginx/dhparams.pem 2048
+      openssl dhparam -out /etc/nginx/dhparams.pem 2048
 
-    rm /etc/nginx/sites-{available,enabled}/default
+      rm /etc/nginx/sites-{available,enabled}/default
 
-    cat >/etc/nginx/sites-available/catch-all <<EOF
+      cat >/etc/nginx/sites-available/catch-all <<EOF
 server {
     return 404;
 }
 EOF
 
-    ln -s /etc/nginx/sites-{available,enabled}/catch-all
+      ln -s /etc/nginx/sites-{available,enabled}/catch-all
 
-    usermod -aG www-data "$user"
+      usermod -aG www-data "$user"
 
-    service nginx restart
+      service nginx restart
+    fi
   fi
+
 }
-if [ "$PREFER_APACHE" == "true" ]; then
-  install apache2
-
-  if command_exists ufw; then
-    ufw allow 'Nginx Full'
-  fi
-
-fi
 
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
@@ -426,7 +444,7 @@ step_php() {
       echo "$user ALL=NOPASSWD: /usr/sbin/service php5-fpm reload"
     ) >>/etc/sudoers.d/php-fpm
 
-    install php-{common,cli,fpm,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
+    install php-{common,cli,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
     install php
 
     sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/cli/php.ini
@@ -823,14 +841,11 @@ main() {
   info "Installing UFW"
   step_ufw
 
-  info "Installing nginx"
-  step_nginx
-
-  info "Installing apache"
-  step_apache
-
   info "Installing php 7.4"
   step_php
+
+  info "Installing nginx (or Apache if you prefered)"
+  step_nginx
 
   info "Installing node 12"
   step_node
