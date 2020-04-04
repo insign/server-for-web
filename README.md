@@ -125,6 +125,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Add Apache Server as alternative to nginx
 - [ ] Configure private network
 - [ ] Allow only some IPs via as parameter
+- [ ] Fine tune our apps
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
