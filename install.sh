@@ -730,6 +730,11 @@ parse_arguments() {
       NO_NGINX="true"
       shift 1
       ;;
+    --prefer-apache) # installs apache instead nginx (Unlike default behavior)
+      NO_NGINX="true"
+      PREFER_APACHE="true"
+      shift 1
+      ;;
     --no-php) # don't install or configure php (Unlike default behavior)
       NO_PHP="true"
       shift 1

@@ -74,6 +74,7 @@ bash install.sh
 * `--no-omz` - don't install [oh-my-zsh](https://ohmyz.sh/) framework (not recommended)
 * `--no-mosh` - don't install [mosh](https://mosh.org) (ssh alternative)
 * `--no-ufw` - don't install or configure UFW firewall (not recommended)
+* `--prefer-apache` - Install Apache Server (and don't install or configure nginx)
 * `--no-nginx` - don't install or configure nginx
 * `--no-php` - don't install or configure php
 * `--no-node` - don't install or configure yarn/node/npm
@@ -122,7 +123,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 
 ## Roadmap
-- [ ] Add Apache Server as alternative to nginx
+- [X] Add Apache Server as alternative to nginx
 - [ ] Configure private network
 - [ ] Allow only some IPs via as parameter
 - [ ] Fine tune our apps
