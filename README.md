@@ -1,5 +1,5 @@
 # server-for-laravel
-One-time fully automated shell script to install all needed software to run Laravel on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx, php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd, fail2ban, mosh. Optional parameters available.
+One-time fully automated shell script to install all needed software to run any php framework on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx (or apache), php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd, fail2ban, mosh. Optional parameters available.
 
 <p align="center">
   <a href="https://asciinema.org/a/311864"><img src="https://cdn.jsdelivr.net/gh/insign/server-for-laravel/demo.svg"></a>
@@ -13,11 +13,11 @@ Beyond the description, here some things that this script does (by default):
 - Creates swap file to avoid lack of memory
 - Auto-generates secure and easy-to-copy passwords
 - Installs and enable ufw, and fail2ban
-- Enable better gzip on nginx
-- Installs php7.4 (and others versions), many extensions with composer (and [prestissimo](https://github.com/hirak/prestissimo))
+- nginx with better gzip on, or Apache if you prefer. 
+- Installs php7.4 (with FPM) (and others versions), many popular extensions, composer, [prestissimo](https://github.com/hirak/prestissimo)
 - Secure install MariaDB (mysql) and PostgreSQL
 - Installs supervisor daemon
-- [Certbot](https://certbot.eff.org/) (let's encrypt) with CloudFlare plugin (others available to install)
+- [Certbot](https://certbot.eff.org/) with [DNS plugins](https://certbot.eff.org/docs/using.html#dns-plugins):cloudflare,digitalocean,dnsimple,google,rfc2136,route53
 - Generates server ssh key
 - Import keys from popular git services (github, bitbucket, gitlab)
 
@@ -128,6 +128,10 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Allow only some IPs via as parameter
 - [ ] Fine tune our apps
 - [ ] Make the maintenance time random
+- [ ] Add mysql as alternative to MariaDB
+- [ ] Add colorls
+- [ ] Add zsh some plugins by default
+- [ ] Add insign/server-scripts
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
