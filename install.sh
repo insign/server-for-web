@@ -269,8 +269,9 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip bat ruby ruby-dev ruby-colorize
   pip install speedtest-cli
+  gem install colorls
 
   git config --global user.name "$name"
   git config --global user.email "$email"
@@ -851,7 +852,7 @@ main() {
   info "Installing supervisor daemon"
   step_supervisor
 
-  info "Installing certbot (with CloudFlare plugin)"
+  info "Installing certbot"
   step_certbot
 
   info "Installing Redis"
