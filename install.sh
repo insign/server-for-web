@@ -269,7 +269,7 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip bat ruby ruby-dev ruby-colorize
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip ruby ruby-dev ruby-colorize
   pip install speedtest-cli
   gem install colorls
 

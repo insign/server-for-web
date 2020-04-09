@@ -8,7 +8,7 @@ One-time fully automated shell script to install all needed software to run any 
 Beyond the description, here some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
-- CLI tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php), [`speedtest`](https://github.com/sivel/speedtest-cli), [`micro`](https://micro-editor.github.io/), [`mosh`](https://mosh.org/), [`bat`](https://github.com/sharkdp/bat)
+- CLI tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php), [`speedtest`](https://github.com/sivel/speedtest-cli), [`micro`](https://micro-editor.github.io/), [`mosh`](https://mosh.org/)
 - Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/), [pure](https://github.com/sindresorhus/pure), [neofetch](https://github.com/dylanaraps/neofetch)
 - Creates swap file to avoid lack of memory
 - Auto-generates secure and easy-to-copy passwords
