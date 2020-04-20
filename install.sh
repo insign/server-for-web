@@ -567,6 +567,7 @@ step_redis() {
     echo "requirepass $redis_pass" >>/etc/redis/redis.conf
     add_to_report "Redis,(none),$RED$BOLD$redis_pass$RESET"
     service redis-server restart
+    systemctl enable redis-server
   fi
 }
 
