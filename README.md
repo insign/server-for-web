@@ -123,7 +123,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 
 ## Roadmap
-- [ ] Add [transfer.sh](https://transfer.sh) alias
+
+- [ ] Add [qrcp](https://github.com/claudiodangelis/qrcp)
 - [X] Add Apache Server as alternative to nginx
 - [ ] Configure private network
 - [ ] Allow only some IPs via as parameter

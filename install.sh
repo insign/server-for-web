@@ -224,7 +224,7 @@ step_initial() {
     mkswap /swapfile
     swapon /swapfile
     swapon -s # status
-    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
   fi
 
   if [ "$SKIP_UPDATES" != "true" ]; then
