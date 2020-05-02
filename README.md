@@ -124,6 +124,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 ## Roadmap
 
+- [ ] Adjust composer install to checksum https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 - [ ] Add [qrcp](https://github.com/claudiodangelis/qrcp)
 - [X] Add Apache Server as alternative to nginx
 - [ ] Configure private network
