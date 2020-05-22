@@ -133,7 +133,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Make the maintenance time random
 - [ ] Add mysql as alternative to MariaDB
 - [ ] Add colorls
-- [ ] Add zsh some plugins by default
+- [ ] Add zsh some plugins by default (sudo, fd, fzf, zsh-interactive-cd)
 - [ ] Add insign/server-scripts
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
