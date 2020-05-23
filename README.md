@@ -129,6 +129,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [X] Add Apache Server as alternative to nginx
 - [ ] Configure private network
 - [ ] Allow only some IPs via as parameter
+- [ ] Disable MySQL log and log bin
 - [ ] Fine tune our apps
 - [ ] Make the maintenance time random
 - [ ] Add mysql as alternative to MariaDB
