@@ -1,4 +1,4 @@
-# server-for-laravel
+# server-for-web
 One-time fully automated shell script to install all needed software to run any php framework on Ubuntu 18.04 LTS. Creates user, installs ufw, nginx (or apache), php, nodejs/yarn, MariaDB/MySQL, PostgreSQL, Certbot (Let's Encrypt), Redis, Memcached, Beanstalkd, fail2ban, mosh. Optional parameters available.
 
 <p align="center">
