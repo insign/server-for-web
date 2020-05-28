@@ -8,7 +8,7 @@ One-time fully automated shell script to install all needed software to run any 
 Beyond the description, here some things that this script does (by default):
 - Enables ubuntu auto-upgrade security releases
 - Uses apt-fast to speed-up instalation
-- CLI tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php), [`speedtest`](https://github.com/sivel/speedtest-cli), [`micro`](https://micro-editor.github.io/), [`mosh`](https://mosh.org/), [`fdfind`](https://github.com/sharkdp/fd), [`fzf`](https://github.com/junegunn/fzf)
+- CLI tools: [`ncdu`](https://en.wikipedia.org/wiki/Ncdu), [`awscli`](https://aws.amazon.com/cli/), `whois`, [`httpie`](https://httpie.org/), [`mc`](http://linuxcommand.org/lc3_adv_mc.php), [`speedtest`](https://github.com/sivel/speedtest-cli), [`micro`](https://micro-editor.github.io/), [`mosh`](https://mosh.org/)
 - Installs and enable zsh with [oh-my-zsh](https://ohmyz.sh/), [pure](https://github.com/sindresorhus/pure), [neofetch](https://github.com/dylanaraps/neofetch)
 - Creates swap file to avoid lack of memory
 - Auto-generates secure and easy-to-copy passwords
@@ -134,7 +134,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Make the maintenance time random
 - [ ] Add mysql as alternative to MariaDB
 - [ ] Add colorls
-- [ ] Add zsh some plugins by default (sudo, fd, fzf, zsh-interactive-cd)
+- [ ] Install [`fdfind`](https://github.com/sharkdp/fd), [`fzf`](https://github.com/junegunn/fzf) on 19.04+
+- [ ] Add zsh some plugins by default (sudo, fd, fzf, zsh-interactive-cd, artisan)
 - [ ] Add insign/server-scripts
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
