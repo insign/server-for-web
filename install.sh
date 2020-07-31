@@ -402,7 +402,7 @@ EOF
 
       openssl dhparam -out /etc/nginx/dhparams.pem 2048
 
-      rm -rf /etc/nginx/sites-{available,enabled}/default
+      rm -rf /etc/nginx/sites-{available,enabled}/{default,catch-all}
 
       cat >/etc/nginx/sites-available/catch-all <<EOF
 server {
