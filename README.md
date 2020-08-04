@@ -124,6 +124,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 
 ## Roadmap
 
+- [ ] Add pm2 and support for node sites
 - [ ] Adjust composer install to checksum https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 - [ ] Add [qrcp](https://github.com/claudiodangelis/qrcp)
 - [X] Add Apache Server as alternative to nginx
@@ -136,7 +137,7 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
 - [ ] Add colorls
 - [ ] Install [`fdfind`](https://github.com/sharkdp/fd), [`fzf`](https://github.com/junegunn/fzf) on 19.04+
 - [ ] Add zsh some plugins by default (sudo, fd, fzf, zsh-interactive-cd, artisan)
-- [ ] Add insign/server-scripts
+- [X] Add insign/server-scripts
 - [X] Finish postgresql installation
 - [X] Finish Certbot installation
 - [X] Finish supervisord installation
