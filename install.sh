@@ -460,8 +460,6 @@ step_php() {
     curl -sS https://getcomposer.org/installer | php
     mv composer.phar /usr/local/bin/composer
 
-    runuser -l $user -c $'composer global require hirak/prestissimo'
-
     service php7.4-fpm restart
   fi
 }
