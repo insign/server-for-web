@@ -179,7 +179,7 @@ root_required() {
 others_checks() {
   root_required
 
-  if [[ $(lsb_release -rs) != "18.04" ]]; then
+  if [[ $(lsb_release -rs) != "18.04" ] && [ $(lsb_release -rs) != "20.04" ]]; then
     error "This script was tested only on Ubuntu 18.04 LTS"
   fi
 }
