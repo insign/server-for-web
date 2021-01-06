@@ -26,7 +26,7 @@ Beyond the description, here some things that this script does (by default):
 >To better choose what to install, check [Parameters](#parameters-all-optional) section
 
 ### Requisites
-- **Ubuntu 18.04 LTS**
+- **Ubuntu 18.04 LTS** or  **Ubuntu 20.04 LTS _(BETA HERE)_** 
 - **root**/sudo as current user
 - `curl` or `wget` should be installed
 - a **_new server_**. We are not responsible for any loss you may suffer.
