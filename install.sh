@@ -554,7 +554,7 @@ step_supervisor() {
 
 step_certbot() {
   if [ "$NO_CERTBOT" != "true" ]; then
-    install certbot python-certbot-nginx python-certbot-apache python3-certbot-dns-{cloudflare,digitalocean,dnsimple,google,rfc2136,route53}
+    install certbot python3-certbot-*
   fi
 }
 
