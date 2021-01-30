@@ -6,7 +6,7 @@
 #   bash -c "$(wget -qO- https://git.io/Jv9a6)"
 #
 # As an alternative, you can first download the install script and run it afterwards:
-#   wget https://raw.githubusercontent.com/insign/server-for-laravel/master/install.sh
+#   wget https://raw.githubusercontent.com/insign/server-for-web/master/install.sh
 #   bash install.sh
 
 set -e
@@ -19,7 +19,7 @@ call_vars() {
   name=${name:-DevOps}
   email=${user:-"no-one-@got"}
 
-  user=${user:-laravel}
+  user=${user:-web}
   pass=${pass:=$(random_string)}
   pg_pass=${pg_pass:=$(random_string)}
 
@@ -64,7 +64,7 @@ error() {
 }
 
 info() {
-  echo -e "$GREEN""$BOLD"SERVER FOR LARAVEL:"$RESET $BLUE""$@""$RESET" >&2
+  echo -e "$GREEN""$BOLD"SERVER FOR WEB:"$RESET $BLUE""$@""$RESET" >&2
 }
 warning() {
   echo -e "$YELLOW""Warning: $@""$RESET" >&2
