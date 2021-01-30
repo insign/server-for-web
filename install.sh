@@ -270,7 +270,7 @@ step_initial() {
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
   install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize
-  pip install speedtest-cli
+  pip3 install speedtest-cli
   gem install colorls
 
   git config --global user.name "$name"
