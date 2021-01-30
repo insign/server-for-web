@@ -236,6 +236,8 @@ step_initial() {
 
     add-apt-repository -yn ppa:apt-fast/stable
 
+    add-apt-repository -yn universe
+
     # postgresql
     echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -267,7 +269,7 @@ step_initial() {
   echo debconf apt-fast/dlflag boolean true | debconf-set-selections
   echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
-  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python-pip ruby ruby-dev ruby-colorize
+  install zsh git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize
   pip install speedtest-cli
   gem install colorls
 
