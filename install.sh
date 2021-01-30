@@ -251,9 +251,6 @@ step_initial() {
     apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
     add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
 
-    # CERTBot
-    add-apt-repository -yn ppa:certbot/certbot
-
     # Redis Server
     add-apt-repository -yn ppa:chris-lea/redis-server
 
