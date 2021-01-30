@@ -421,8 +421,9 @@ EOF
 
 step_php() {
   if [ "$NO_PHP" != "true" ]; then
-    echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload" >/etc/sudoers.d/php-fpm
+    echo "$user ALL=NOPASSWD: /usr/sbin/service php8.0-fpm reload" >/etc/sudoers.d/php-fpm
     (
+      echo "$user ALL=NOPASSWD: /usr/sbin/service php7.4-fpm reload"
       echo "$user ALL=NOPASSWD: /usr/sbin/service php7.3-fpm reload"
       echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
       echo "$user ALL=NOPASSWD: /usr/sbin/service php7.2-fpm reload"
@@ -435,23 +436,23 @@ step_php() {
     install php-{common,cli,fpm,bcmath,pear,curl,dev,gd,mbstring,zip,mysql,xml,soap,imagick,sqlite3,intl,readline,imap,pgsql,tokenizer,redis,memcached}
     install php
 
-    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/cli/php.ini
-    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/cli/php.ini
-    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/cli/php.ini
-    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/cli/php.ini
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/8.0/cli/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/8.0/cli/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/8.0/cli/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/8.0/cli/php.ini
 
-    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.4/fpm/php.ini
-    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.4/fpm/php.ini
-    sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.4/fpm/php.ini
-    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.4/fpm/php.ini
-    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.4/fpm/php.ini
+    sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/8.0/fpm/php.ini
+    sed -i "s/display_errors = .*/display_errors = On/" /etc/php/8.0/fpm/php.ini
+    sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/8.0/fpm/php.ini
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/8.0/fpm/php.ini
+    sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/8.0/fpm/php.ini
 
-    sed -i "s/^user = www-data/user = $user/" /etc/php/7.4/fpm/pool.d/www.conf
-    sed -i "s/^group = www-data/group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
-    sed -i "s/;listen\.owner.*/listen.owner = $user/" /etc/php/7.4/fpm/pool.d/www.conf
-    sed -i "s/;listen\.group.*/listen.group = $user/" /etc/php/7.4/fpm/pool.d/www.conf
-    sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.4/fpm/pool.d/www.conf
-    sed -i "s/;request_terminate_timeout.*/request_terminate_timeout = 60/" /etc/php/7.4/fpm/pool.d/www.conf
+    sed -i "s/^user = www-data/user = $user/" /etc/php/8.0/fpm/pool.d/www.conf
+    sed -i "s/^group = www-data/group = $user/" /etc/php/8.0/fpm/pool.d/www.conf
+    sed -i "s/;listen\.owner.*/listen.owner = $user/" /etc/php/8.0/fpm/pool.d/www.conf
+    sed -i "s/;listen\.group.*/listen.group = $user/" /etc/php/8.0/fpm/pool.d/www.conf
+    sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/8.0/fpm/pool.d/www.conf
+    sed -i "s/;request_terminate_timeout.*/request_terminate_timeout = 60/" /etc/php/8.0/fpm/pool.d/www.conf
 
     chmod 733 /var/lib/php/sessions
     chmod +t /var/lib/php/sessions
@@ -459,7 +460,7 @@ step_php() {
     curl -sS https://getcomposer.org/installer | php
     mv composer.phar /usr/local/bin/composer
 
-    service php7.4-fpm restart
+    service php8.0-fpm restart
   fi
 }
 step_node() {
@@ -836,7 +837,7 @@ main() {
   info "Installing nginx (or Apache if you prefered)"
   step_webserver
 
-  info "Installing php 7.4"
+  info "Installing php 8.0"
   step_php
 
   info "Installing node 12"
