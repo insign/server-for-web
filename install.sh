@@ -257,7 +257,7 @@ step_initial() {
     add-apt-repository -yn ppa:chris-lea/redis-server
 
     # node / npm
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 
     apt update && apt upgrade -y
   fi
@@ -840,7 +840,7 @@ main() {
   info "Installing php 8.0"
   step_php
 
-  info "Installing node 12"
+  info "Installing node 14 LTS"
   step_node
 
   info "Installing MariaDB 10.4"
