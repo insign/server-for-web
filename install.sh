@@ -47,7 +47,9 @@ show_report() {
 }
 
 random_string() {
-  sed "s/[^a-zA-Z0-9]//g" <<<$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%*()+-' | fold -w 32 | head -n 1)
+	# shellcheck disable=SC2002
+	local -r rand=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%*()+-' | fold -w 32 | head -n 1)
+  echo "${rand//[^a-zA-Z0-9]}"
 }
 
 command_exists() {
@@ -59,18 +61,18 @@ install() {
 }
 
 error() {
-  echo -e "$RED""Error: $@""$RESET" >&2
+  echo -e "$RED""Error: $*""$RESET" >&2
   exit 1
 }
 
 info() {
-  echo -e "$GREEN""$BOLD"SERVER FOR WEB:"$RESET $BLUE""$@""$RESET" >&2
+  echo -e "$GREEN""$BOLD"SERVER FOR WEB:"$RESET $BLUE""$*""$RESET" >&2
 }
 warning() {
-  echo -e "$YELLOW""Warning: $@""$RESET" >&2
+  echo -e "$YELLOW""Warning: $*""$RESET" >&2
 }
 success() {
-  echo -e "$GREEN""$@""$RESET" >&2
+  echo -e "$GREEN""$*""$RESET" >&2
 }
 
 removeEmptyLines() {
@@ -86,6 +88,7 @@ isEmptyString() {
 }
 
 trimString() {
+  # shellcheck disable=SC2001
   sed 's,^[[:blank:]]*,,' <<<"${1}" | sed 's,[[:blank:]]*$,,'
 }
 
@@ -186,6 +189,7 @@ others_checks() {
 
 getDuration() {
   end_time=$(date +"%s")
+  # shellcheck disable=SC2004
   local duration=$(($end_time - $start_time))
   local shiff=$duration
   local secs=$((shiff % 60))
@@ -219,7 +223,7 @@ step_initial() {
       swapoff /swapfile
       rm /swapfile
     fi
-    dd if=/dev/zero of=/swapfile bs=1M count=$swapsize
+    dd if=/dev/zero of=/swapfile bs=1M count="$swapsize"
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
@@ -285,7 +289,7 @@ step_initial() {
 step_user_creation() {
   add_to_report "System,root,(untouched)"
   if [ "$CREATE_NEW_USER" != "false" ]; then
-    if [ $(getent passwd "$user") ]; then
+    if [ "$(getent passwd "$user")" ]; then
       if [ "$KEEP_EXISTING_USER" != "true" ]; then
         info Deleting current user: "$GREEN$BOLD$user$RESET"
         userdel -r "$user"
@@ -295,12 +299,14 @@ step_user_creation() {
       fi
     fi
 
-    useradd "$user" --create-home --password $(openssl passwd -1 "$pass") --shell $(which zsh)
+    useradd "$user" --create-home --password "$(openssl passwd -1 "$pass")" --shell "$(which zsh)"
     usermod -aG sudo "$user" # append to sudo and user group
     success User created: "$BLUE""$BOLD""$user"
     add_to_report "System,$RED$BOLD$user$RESET,$RED$BOLD$pass$RESET"
 
     eval local -r user_home="~$user"
+    # shellcheck disable=SC2154
+    # shellcheck disable=SC2174
     mkdir -p "$user_home/.ssh/" -m 755
 
     chown -R "$user:$user" "$user_home"
@@ -484,6 +490,7 @@ step_mysql() {
     sed -i '/^bind-address/s/bind-address.*=.*/bind-address = */' /etc/mysql/my.cnf
 
     local -r RAM=$(awk '/^MemTotal:/{printf "%3.0f", $2 / (1024 * 1024)}' /proc/meminfo)
+    # shellcheck disable=SC2004
     local -r MAX_CONNECTIONS=$((70 * $RAM))
     local -r REAL_MAX_CONNECTIONS=$((MAX_CONNECTIONS > 70 ? MAX_CONNECTIONS : 100))
     sed -i "s/^max_connections.*=.*/max_connections=${REAL_MAX_CONNECTIONS}/" /etc/mysql/my.cnf
@@ -537,7 +544,7 @@ step_postgres() {
     runuser -l postgres -c "psql -c \"ALTER USER ${user} PASSWORD '${pg_pass_user}';\""
     runuser -l postgres -c "psql -c \"ALTER USER postgres PASSWORD '${pg_pass_root}';\""
 
-    usermod -p $(openssl passwd -1 "$pg_pass") postgres
+    usermod -p "$(openssl passwd -1 "$pg_pass")" postgres
 
     add_to_report "System,$RED${BOLD}postgres$RESET,$RED$BOLD${pg_pass}$RESET"
     add_to_report "PostgreSQL,$RED${BOLD}postgres$RESET,$RED$BOLD${pg_pass_root}$RESET"
@@ -588,20 +595,21 @@ step_beanstalkd() {
 
 step_final() {
   if [ "$NO_OMZ" != "true" ]; then
-    runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+    # shellcheck disable=SC2016
+    runuser -l "$user" -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
     runuser -l "$user" -c "chsh --shell $(which zsh)"
   fi
 
   if command_exists yarn; then
     yarn global add pure-prompt
-    runuser -l $user -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
-    runuser -l $user -c "echo 'prompt pure' >> ~/.zshrc"
+    runuser -l "$user" -c "echo 'autoload -U promptinit; promptinit' >> ~/.zshrc"
+    runuser -l "$user" -c "echo 'prompt pure' >> ~/.zshrc"
   fi
 
-  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.composer/vendor/bin"\' >> ~/.zshrc'
-  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
-  runuser -l $user -c $'echo \'export PATH="$PATH:$HOME/.yarn/bin"\' >> ~/.zshrc'
-  runuser -l $user -c "echo 'neofetch' >> ~/.zshrc"
+  runuser -l "$user" -c $'echo \'export PATH="$PATH:$HOME/.composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l "$user" -c $'echo \'export PATH="$PATH:$HOME/.config/composer/vendor/bin"\' >> ~/.zshrc'
+  runuser -l "$user" -c $'echo \'export PATH="$PATH:$HOME/.yarn/bin"\' >> ~/.zshrc'
+  runuser -l "$user" -c "echo 'neofetch' >> ~/.zshrc"
 
   if [ "$NO_MOSH" != "true" ]; then
     install mosh
