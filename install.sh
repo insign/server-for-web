@@ -589,6 +589,7 @@ step_beanstalkd() {
 step_final() {
   if [ "$NO_OMZ" != "true" ]; then
     runuser -l $user -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended'
+    runuser -l "$user" -c "chsh --shell $(which zsh)"
   fi
 
   if command_exists yarn; then
