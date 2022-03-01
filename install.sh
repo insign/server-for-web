@@ -47,9 +47,10 @@ show_report() {
 }
 
 random_string() {
+	# shellcheck disable=SC2001
+	# shellcheck disable=SC2046
 	# shellcheck disable=SC2002
-	local -r rand=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%*()+-' | fold -w 32 | head -n 1)
-  echo "${rand//[^a-zA-Z0-9]}"
+	sed "s/[^a-zA-Z0-9]//g" <<<$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$%*()+-' | fold -w 32 | head -n 1)
 }
 
 command_exists() {
