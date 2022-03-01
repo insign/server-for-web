@@ -93,6 +93,7 @@ bash install.sh
 * `--no-beanstalkd` - don't install or configure beanstalkd
 * `--key-only=` - put here (with quotes) your personal ssh pubkey if you want to disable login using password. _**WARNING**: Be sure to know what you are doing._
 * `--reboot` - reboot the system at the end of the script executation. Normally should **_not_** be used.
+* `--human` - If there is a human waiting for the end. Then enters new terminal.
 
 ## Examples
 #### Directly from you computer

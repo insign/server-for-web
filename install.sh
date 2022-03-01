@@ -646,7 +646,9 @@ EOF
     reboot
   fi
 
-  su -l "$user"
+  if [[ "$HUMAN" == "true" ]]; then
+    su -l "$user"
+  fi
 
 }
 
@@ -676,6 +678,10 @@ parse_arguments() {
       REBOOT_ITE="true"
       shift 1
       ;;
+		--human) # enter new terminal at the end.
+			HUMAN="true"
+			shift 1
+			;;
     --dont-create-new-user) # don't creates a new user (Unlike default behavior)
       CREATE_NEW_USER="false"
       shift 1
