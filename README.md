@@ -26,9 +26,9 @@ Beyond the description, here some things that this script does (by default):
 >To better choose what to install, check [Parameters](#parameters-all-optional) section
 
 ### Requisites
-- **Ubuntu 18.04 LTS** or  **Ubuntu 20.04 LTS _(BETA HERE)_** 
+- **Ubuntu 18.04 LTS** _(DEPRECATED HERE)_ or  **Ubuntu 20.04 LTS _(BETA HERE)_** 
 - **root**/sudo as current user
-- `curl` or `wget` should be installed
+- `curl` or `wget` should be installed (unless you clone the repo)
 - a **_new server_**. We are not responsible for any loss you may suffer.
   -  My referral links: [Vultr](https://www.vultr.com/?ref=7205888) - [DigitalOcean](https://m.do.co/c/4361152a43e1)
 

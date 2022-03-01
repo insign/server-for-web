@@ -231,57 +231,41 @@ step_initial() {
     echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
   fi
 
-  if [ "$SKIP_UPDATES" != "true" ]; then
-    info Updates and Upgrades...
+	info Essential Updates and Upgrades...
 
-    apt install -y locales language-pack-en-base software-properties-common build-essential
-    export LC_ALL=en_US.UTF-8
-    export LANG=en_US.UTF-8
+	apt install -y locales language-pack-en-base software-properties-common build-essential
+	export LC_ALL=en_US.UTF-8
+	export LANG=en_US.UTF-8
 
-    add-apt-repository -yn ppa:apt-fast/stable
+	add-apt-repository -yn ppa:apt-fast/stable
 
-    add-apt-repository -yn universe
+	add-apt-repository -yn universe
 
-    # postgresql
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+	# yarn
+	curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/yarnkey.gpg >/dev/null
+	echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
-    # yarn
-    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+	# node / npm (which do apt update too)
+	curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 
-    # PHP
-    LC_ALL=C.UTF-8 add-apt-repository -yn ppa:ondrej/php
-
-    # MariaDB 10.4
-    apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
-    add-apt-repository -yn 'deb [arch=amd64,arm64,ppc64el] http://nyc2.mirrors.digitalocean.com/mariadb/repo/10.4/ubuntu bionic main'
-
-    # Redis Server
-    add-apt-repository -yn ppa:chris-lea/redis-server
-
-    # node / npm
-    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-
-    apt update && apt upgrade -y
-  fi
+	apt -y install apt-fast
+	echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
+	echo debconf apt-fast/dlflag boolean true | debconf-set-selections
+	echo debconf apt-fast/aptmanager string apt | debconf-set-selections
 
   info Installing zsh and other basics...
 
-  apt -y install apt-fast
-  echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
-  echo debconf apt-fast/dlflag boolean true | debconf-set-selections
-  echo debconf apt-fast/aptmanager string apt | debconf-set-selections
+  if [ "$SKIP_UPDATES" != "true" ]; then
+    info Upgrading system...
 
-  install zsh net-tools git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize
-  pip3 install speedtest-cli
+    apt-fast upgrade -y
+  fi
+
+  install micro zsh net-tools git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize speedtest-cli
   gem install colorls
 
   git config --global user.name "$name"
   git config --global user.email "$email"
-
-  curl https://getmic.ro | bash
-  mv ./micro /usr/bin/micro
 
   add_to_report 'TYPE,USER,PASSWORD'
 }
@@ -480,7 +464,7 @@ step_mysql() {
   if [ "$NO_MYSQL" != "true" ]; then
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password password $my_pass_root"
     debconf-set-selections <<<"mariadb-server-5.5 mysql-server/root_password_again password $my_pass_root"
-    install mariadb-server-10.4
+    install mariadb-server
     echo -e "[mariadb]\ndefault_password_lifetime = 0" >>/etc/mysql/mariadb.conf.d/mariadb.cnf
     (
       echo ''
@@ -537,8 +521,9 @@ step_mysql() {
 }
 step_postgres() {
   if [ "$NO_POSTGRES" != "true" ]; then
-    install postgresql-11
-    pg_ctlcluster 11 main start
+    install postgresql postgresql-contrib
+    local -r pg_version=$(psql --version 2>&1 | tail -1 | awk '{print $3}' | sed 's/\./ /g' | awk '{print $1}')
+    pg_ctlcluster "$pg_version" main start
 
     runuser -l postgres -c "psql -c \"CREATE ROLE ${user} CREATEDB CREATEROLE\""
     runuser -l postgres -c "psql -c \"ALTER USER ${user} PASSWORD '${pg_pass_user}';\""
