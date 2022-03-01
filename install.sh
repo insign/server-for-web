@@ -234,7 +234,6 @@ step_initial() {
 
 	info Essential Updates and Upgrades...
 
-	apt install -y locales language-pack-en-base software-properties-common build-essential
 	export LC_ALL=en_US.UTF-8
 	export LANG=en_US.UTF-8
 
@@ -249,10 +248,10 @@ step_initial() {
 	# node / npm (which do apt update too)
 	curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 
-	apt -y install apt-fast
 	echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
 	echo debconf apt-fast/dlflag boolean true | debconf-set-selections
 	echo debconf apt-fast/aptmanager string apt | debconf-set-selections
+	apt -y install apt-fast
 
   info Installing zsh and other basics...
 
@@ -262,7 +261,7 @@ step_initial() {
     apt-fast upgrade -y
   fi
 
-  install micro zsh net-tools git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize speedtest-cli
+  install locales language-pack-en-base software-properties-common build-essential micro zsh net-tools git curl wget zip unzip expect fail2ban xclip whois awscli httpie mc p7zip-full htop neofetch python3-pip ruby ruby-dev ruby-colorize speedtest-cli
   gem install colorls
 
   git config --global user.name "$name"
