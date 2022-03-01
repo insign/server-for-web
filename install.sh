@@ -649,7 +649,6 @@ EOF
   if [[ "$HUMAN" == "true" ]]; then
     su -l "$user"
   fi
-
 }
 
 setup_color() {
