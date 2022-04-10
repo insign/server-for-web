@@ -17,7 +17,7 @@ call_vars() {
   KEY_ONLY=${KEY_ONLY:-false}
 
   name=${name:-DevOps}
-  email=${user:-"no-one-@got"}
+  email=${user:-"no-one@got"}
 
   user=${user:-web}
   pass=${pass:=$(random_string)}
