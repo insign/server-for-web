@@ -159,6 +159,8 @@ bash -c "$(curl -fsSL https://git.io/Jv9a6)" "" --no-mysql --no-nginx --no-php -
   - [X] Reboot after done
 - [X] Count time passed during installation
 - [ ] Add CI for this script.
+- [ ] Add docker and docker-compose
+- [ ] Add better support for ufw
 
 ## Contributing
 You are welcome, just do a PR with some explanation.
